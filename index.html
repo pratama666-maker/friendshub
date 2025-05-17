@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Chat Bot</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      font-family: sans-serif;
+      background-color: #121212;
+      color: white;
+      overflow-x: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    .chat {
+      display: flex;
+      flex-direction: column;
+      max-width: 100vw;
+      height: 100vh;
+    }
+    .message {
+      display: flex;
+      align-items: flex-end;
+      margin-bottom: 1rem;
+      max-width: 100%;
+      word-break: break-word;
+    }
+    .message.bot, .message.user {
+      position: relative;
+    }
+    .message.bot {
+      justify-content: flex-start;
+    }
+    .message.user {
+      justify-content: flex-end;
+    }
+    .bubble {
+      max-width: 70vw;
+      padding: 0.75rem;
+      border-radius: 1rem;
+      background-color: #2a2a2a;
+      position: relative;
+    }
+    .message.bot .bubble {
+      background-color: #1e88e5;
+    }
+    .profile-pic {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+      background-color: #555;
+      flex-shrink: 0;
+    }
+    .timestamp {
+      font-size: 0.7rem;
+      color: #aaa;
+      margin-top: 0.25rem;
+    }
+    .status {
+      font-size: 0.75rem;
+      color: #00e676;
+    }
+    .typing-indicator {
+      display: inline-block;
+      width: 40px;
+      height: 20px;
+      background: url('https://media.tenor.com/On7kvXhzml4AAAAj/loading-gif.gif') no-repeat center;
+      background-size: contain;
+    }
+    .input-bar {
+      display: flex;
+      padding: 1rem;
+      background-color: #1e1e1e;
+      border-top: 1px solid #333;
+    }
+    input {
+      flex: 1;
+      padding: 0.75rem;
+      border-radius: 2rem;
+      border: none;
+      background-color: #333;
+      color: white;
+    }
+    button {
+      background-color: #00e676;
+      border: none;
+      color: black;
+      padding: 0.75rem 1rem;
+      border-radius: 2rem;
+      margin-left: 0.5rem;
+      cursor: pointer;
+    }
+    .sticker-btn {
+      margin-left: 0.5rem;
+      padding: 0.75rem;
+      background-color: #444;
+      border-radius: 50%;
+      cursor: pointer;
+      color: white;
+    }
+    @media (max-width: 600px) {
+      .bubble {
+        max-width: 85vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <audio id="typingSound" src="whatsapp-typing-and-sending-message-sound-effect-204192.mp3" preload="auto"></audio>
+  <audio id="messageSound" src="https://www.myinstants.com/en/instant/error-soundss-25534.mp3" preload="auto"></audio>
+  <div class="chat">
+    <div id="chatHeader" style="display: flex; align-items: center; gap: 10px; padding: 1rem; background-color: #1e1e1e;">
+      <div class="profile-pic" id="botAvatar"></div>
+      <div>
+        <strong id="botName"></strong><br>
+        <span class="status" id="botStatus">online</span>
+      </div>
+    </div>
+    <div class="chat-container" id="chatBox"></div>
+    <div class="input-bar">
+      <input id="messageInput" type="text" placeholder="Tulis pesan..." />
+      <button onclick="sendMessage()">Kirim</button>
+      <div class="sticker-btn" onclick="sendSticker()">🎉</div>
+    </div>
+  </div>
+  <script>
+    const botNames = {
+      pria: ["Raka", "Bima", "Dito", "Fajar", "Yudha"],
+      wanita: ["Sinta", "Alya", "Vina", "Dewi", "Putri"]
+    };
+
+    let botName = localStorage.getItem("botName");
+    let botGender = localStorage.getItem("botGender");
+
+    if (!botName || !botGender) {
+      botGender = Math.random() < 0.5 ? "pria" : "wanita";
+      botName = botNames[botGender][Math.floor(Math.random() * 5)];
+      localStorage.setItem("botName", botName);
+      localStorage.setItem("botGender", botGender);
+    }
+
+    document.getElementById("botName").innerText = `${botName} (${botGender})`;
+
+    const chatBox = document.getElementById("chatBox");
+    const input = document.getElementById("messageInput");
+    const typingSound = document.getElementById("typingSound");
+    const messageSound = document.getElementById("messageSound");
+
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    function appendMessage(sender, text, image = false) {
+      const msg = document.createElement("div");
+      msg.className = `message ${sender}`;
+      msg.innerHTML = `
+        ${sender === "bot" && !isBlocked ? '<div class="profile-pic"></div>' : ''}
+        <div>
+          <div class="bubble">${image ? `<img src='${text}' style='max-width:100%'/>` : text}</div>
+          <div class="timestamp">${new Date().toLocaleTimeString()} ${sender === "user" ? '<span style="color:#aaa;">✔✔</span>' : ''}</div>
+        </div>
+      `;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      if (sender === "bot") messageSound.play();
+    }
+
+    function sendSticker() {
+      appendMessage("user", "https://i.imgur.com/WvEu0cK.png", true);
+      botTyping(() => {
+        appendMessage("bot", "Lucu juga stikernya wkwk 😄");
+      });
+    }
+
+    function botTyping(callback) {
+      const typing = document.createElement("div");
+      typing.className = "message bot typing";
+      typing.innerHTML = `<div class='profile-pic'></div><div class='typing-indicator'></div>`;
+      chatBox.appendChild(typing);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      typingSound.play();
+      setTimeout(() => {
+        chatBox.removeChild(typing);
+        callback();
+      }, 1500 + Math.random() * 1500);
+    }
+
+    function sendMessage() {
+      const msg = input.value.trim();
+      if (!msg || isBlocked) return;
+      appendMessage("user", msg);
+      input.value = "";
+      botRespond(msg);
+    }
+
+    let lastUserReplyTime = Date.now();
+    let botMood = "santai";
+    let isBlocked = false;
+
+    function botRespond(userText) {
+      lastUserReplyTime = Date.now();
+      const imageChance = Math.random();
+      const storyChance = Math.random();
+      botMood = ["santai", "baik", "lucu", "romantis"][Math.floor(Math.random() * 4)];
+      botTyping(() => {
+        if (storyChance < 0.3) {
+          const longMessage = "Kamu tahu nggak, tadi aku ketemu temen lama pas lagi jalan-jalan, eh ternyata dia kerja di tempat yang sama kayak kamu! Dunia sempit ya 😂 Tapi seru sih bisa ngobrol panjang lagi setelah lama nggak ketemu.";
+          appendMessage("bot", longMessage);
+        } else if (imageChance < 0.2) {
+          appendMessage("bot", "https://picsum.photos/200?random=" + Math.floor(Math.random()*1000), true);
+        } else {
+          appendMessage("bot", getBotResponse(userText));
+        }
+      });
+    }
+
+    function getBotResponse(userText) {
+      if (botMood === "marah") return "Kamu diam aja sih!";
+      if (botMood === "lucu") return "Haha kamu lucu juga ya~";
+      if (botMood === "romantis") return "Aku suka gaya chat kamu hehe~ ❤️";
+      if (botMood === "baik") return "Gimana harimu? Semoga baik ya!";
+      return "Okeee, lanjut ngobrol yuk!";
+    }
+
+    setInterval(() => {
+      if (isBlocked) return;
+      if (Date.now() - lastUserReplyTime > 30000) {
+        botMood = "marah";
+        appendMessage("bot", "Kok cuma dibaca doang?!!");
+        if (Math.random() < 0.17) appendMessage("bot", "?? Jawab kek napa sih!",);
+        if (Math.random() < 0.23) appendMessage("bot", "lama banget balesnya",);
+        if (Math.random() < 0.30) appendMessage("bot", "abis ngapain sih?",);
+        if (Math.random() < 0.4) {
+        
+          isBlocked = true;
+          document.getElementById("botStatus").innerText = "offline";
+          document.getElementById("botAvatar").style.display = "none";
+          setTimeout(() => {
+            isBlocked = false;
+            document.getElementById("botStatus").innerText = "online";
+            document.getElementById("botAvatar").style.display = "block";
+            appendMessage("bot", "...udah deh, maafin ya");
+          }, Math.random() * 10000 + 5000);
+        }
+      }
+    }, 4000);
+  </script>
+</body>
+</html>
