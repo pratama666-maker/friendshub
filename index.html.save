@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>9AnonGag</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #222;
+      padding: 16px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    #posts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      padding: 16px;
+    }
+    .card {
+      background: #333;
+      padding: 12px;
+      border-radius: 12px;
+    }
+    .card img, .card video {
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card h3 {
+      margin: 8px 0 0;
+    }
+    #form {
+      padding: 16px;
+      background: #1a1a1a;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin: 6px 0;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    button {
+      background: #f90;
+      color: black;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header>🔥 9AnonGag</header>
+
+  <div id="form">
+    <input id="title" placeholder="Judul" />
+    <textarea id="desc" placeholder="Deskripsi"></textarea>
+    <input id="media" placeholder="URL Gambar/Video" />
+    <button onclick="addPost()">Posting</button>
+  </div>
+
+  <div id="posts"></div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCIDtHVWRQiB-tmOWSK4mnexR_J2SAq790",
+      authDomain: "funhub-3f848.firebaseapp.com",
+      projectId: "funhub-3f848",
+      storageBucket: "funhub-3f848.firebasestorage.app",
+      messagingSenderId: "922163960068",
+      appId: "1:922163960068:web:ab2fd526a8ac67fe095851",
+      measurementId: "G-83LMJ1RV1V"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function addPost() {
+      const title = document.getElementById('title').value;
+      const desc = document.getElementById('desc').value;
+      const media = document.getElementById('media').value;
+
+      if (title && media) {
+        await addDoc(collection(db, "posts"), {
+          title, desc, media, time: Date.now()
+        });
+        document.getElementById('title').value = '';
+        document.getElementById('desc').value = '';
+        document.getElementById('media').value = '';
+      }
+    }
+
+    function renderPosts(data) {
+      const posts = document.getElementById('posts');
+      posts.innerHTML = '';
+      data.forEach(doc => {
+        const post = doc.data();
+        const el = document.createElement('div');
+        el.className = 'card';
+        const isVideo = post.media.includes('.mp4') || post.media.includes('youtube');
+        el.innerHTML = `
+          ${isVideo ? `<video src="${post.media}" controls></video>` : `<img src="${post.media}" alt="media" />`}
+          <h3>${post.title}</h3>
+          <p>${post.desc}</p>
+        `;
+        posts.appendChild(el);
+      });
+    }
+
+    // Load posts realtime
+    onSnapshot(collection(db, "posts"), (snapshot) => {
+      renderPosts(snapshot.docs);
+    });
+  </script>
+
+</body>
+</html>
+
+
+
