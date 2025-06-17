@@ -6,127 +6,1535 @@
   <title>9AnonGag</title>
   <style>
     body {
-      background: #111;
-      color: white;
-      font-family: sans-serif;
       margin: 0;
-      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #222;
     }
+
     header {
-      background: #222;
-      padding: 16px;
-      text-align: center;
-      font-size: 24px;
+      background: #fff;
+      padding: 12px 16px;
+      font-size: 20px;
       font-weight: bold;
-    }
-    #posts {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      padding: 16px;
-    }
-    .card {
-      background: #333;
-      padding: 12px;
-      border-radius: 12px;
-    }
-    .card img, .card video {
-      width: 100%;
-      border-radius: 8px;
-    }
-    .card h3 {
-      margin: 8px 0 0;
-    }
-    #form {
-      padding: 16px;
-      background: #1a1a1a;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 1000;
     }
-    input, textarea, button {
-      width: 100%;
-      margin: 6px 0;
+
+    nav {
+      display: flex;
+      gap: 12px;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #222;
+      font-size: 20px;
+    }
+
+    section {
+      display: none;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    #form input, #form textarea {
       padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    #form button {
+      padding: 10px;
+      background: #222;
+      color: #fff;
       border: none;
       border-radius: 6px;
-      font-size: 14px;
+      cursor: pointer;
     }
-    button {
-      background: #f90;
-      color: black;
-      font-weight: bold;
+
+    #form button:hover {
+      background: #000;
     }
+
+    .card {
+      background: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+    }
+
+    .card img, .card video {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+
+  #nav-bottom a.active svg {
+    stroke: #111;
+  }
+  #nav-bottom a svg {
+    stroke: #888;
+    transition: stroke 0.3s;
+  }
+  #nav-bottom a.active div {
+    color: #111;
+    font-weight: bold;
+  }
+  #nav-bottom a div {
+    color: #888;
+    transition: color 0.3s;
+  }
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: white;
+  min-width: 160px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  z-index: 2000;
+  overflow: hidden;
+}
+
+.dropdown-content a {
+  display: block;
+  padding: 10px 16px;
+  text-decoration: none;
+  color: #222;
+  font-size: 16px;
+}
+
+.dropdown-content a:hover {
+  background-color: #f0f0f0;
+}
+    
   </style>
+  
+  
+<style>
+  .dot {
+    width: 10px;
+    height: 10px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+  }
+  .active-dot {
+    background: white;
+    transform: scale(1.2);
+  }
+</style>
+
+  <style>
+  /* Responsive helper */
+  @media (max-width: 768px) {
+    .desktop-only {
+      display: none !important;
+    }
+  }
+  
+  @media (min-width: 769px) {
+    .header-search input {
+      width: 240px;
+    }
+  }
+</style>
+  
+  <style>
+  /* Sembunyikan elemen .mobile-only di layar lebar (tablet & desktop) */
+  @media (min-width: 768px) {
+    .mobile-only {
+      display: none !important;
+    }
+  }
+
+  /* Tampilkan .desktop-only hanya di layar lebar */
+  @media (max-width: 767px) {
+    .desktop-only {
+      display: none !important;
+    }
+  }
+</style>
+
+<style>
+.post-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease;
+}
+.post-card:hover {
+  transform: translateY(-4px);
+}
+.post-media {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  max-height: 320px;
+}
+.post-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.post-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px 12px;
+}
+.post-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #444;
+}
+</style>
+
+<style>
+  #commentPopup::-webkit-scrollbar {
+    width: 6px;
+  }
+  #commentPopup::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+  }
+</style>
+  
 </head>
 <body>
 
-  <header>🔥 9AnonGag</header>
+<header style="display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: white; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 99;">
+  <!-- Logo -->
+  <div class="logo" style="font-size: 24px; font-weight: bold; color: #007bff;">
+    Fun<span style="color:#111;">Hub</span>
+  </div>
+  
+  <!-- Search bar (PC/iPad only) -->
+  <div class="header-search desktop-only" style="margin: 0 20px;">
+    <input type="text" placeholder="Cari konten..." oninput="handleSearch(this.value)" style="padding: 6px 12px; border: 1px solid #ccc; border-radius: 20px;">
+  </div>
+  
+<!-- Navigation buttons (PC/iPad only) -->
+<nav class="desktop-only" style="display: flex; align-items: center; gap: 20px;">
+  <!-- Beranda -->
+  <a href="#" onclick="navigateTo('beranda')" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #333; font-weight: 500;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#333" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.5z" />
+    </svg>
+    Beranda
+  </a>
+  
+  <!-- Explore -->
+  <a href="#" onclick="navigateTo('explore')" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #333; font-weight: 500;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#333" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M12 2a10 10 0 1010 10A10 10 0 0012 2z" />
+      <path d="M16 8l-4 8-4-4 8-4z" />
+    </svg>
+    Explore
+  </a>
+</nav>
+  
+  <!-- Action icons -->
+  <div style="display: flex; align-items: center; gap: 16px;">
+    <!-- Notifikasi -->
+    <a onclick="navigateTo('notifikasi')" style="cursor:pointer;" title="Notifikasi">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#333" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M15 17h5l-1.4-1.4c-.4-.4-.6-.8-.6-1.6V10a6 6 0 10-12 0v4c0 .8-.2 1.2-.6 1.6L4 17h5m6 0v1a3 3 0 11-6 0v-1h6z" />
+      </svg>
+    </a>
+    
+    <!-- Pesan -->
+    <a onclick="navigateTo('pesan')" style="cursor:pointer;" title="Pesan">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#333" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M21 11.5a8.4 8.4 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.4 8.4 0 01-4.5-1.6l-4 1 1-4a8.4 8.4 0 01-1-4 8.5 8.5 0 0116.5-3.9A8.4 8.4 0 0121 11.5z" />
+      </svg>
+    </a>
+    <!-- Dropdown Profil -->
+    <div class="dropdown" style="position:relative;">
+      <!-- Avatar Bulat -->
+      <a onclick="toggleDropdown()" style="cursor:pointer;">
+        <img src="https://i.pravatar.cc/36" alt="Avatar" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:2px solid #ccc;">
+      </a>
 
-  <div id="form">
-    <input id="title" placeholder="Judul" />
-    <textarea id="desc" placeholder="Deskripsi"></textarea>
-    <input id="media" placeholder="URL Gambar/Video" />
-    <button onclick="addPost()">Posting</button>
+      <!-- Dropdown Menu -->
+      <div id="dropdown-menu" class="dropdown-content" style="position:absolute; right:0; top:50px; background:#fff; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); display:none; flex-direction:column; min-width:180px; z-index:99;">
+        <a onclick="navigateTo('lihat-profil')" style="padding:12px 16px; display:flex; align-items:center; gap:10px; cursor:pointer;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="black" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 1112 21a9 9 0 01-6.879-3.196z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          Lihat Profil
+        </a>
+
+        <a onclick="navigateTo('pengaturan')" style="padding:12px 16px; display:flex; align-items:center; gap:10px; cursor:pointer;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="black" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3M12 1v2m6.364 2.636l-1.414 1.414M21 12h-2M4.636 4.636L3.222 6.05M3 12H1m4.636 5.364l1.414 1.414M12 21v2m5.364-2.636l1.414-1.414M4.636 17.364L6.05 16.95"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          Pengaturan
+        </a>
+
+        <a onclick="navigateTo('login')" style="padding:12px 16px; display:flex; align-items:center; gap:10px; cursor:pointer; color:#d00;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h6a2 2 0 002-2V5a2 2 0 00-2-2H3"/>
+          </svg>
+          Logout
+        </a>
+  </div>
+</header>
+
+<!-- Navigasi Bawah -->
+<div id="nav-bottom" class="mobile-only" style="position:fixed; bottom:0; left:0; width:100%; background:white; border-top:1px solid #ccc; display:flex; justify-content:space-around; align-items:center; padding:10px 0; z-index:99;">
+  <a onclick="navigateTo('beranda')" id="btn-beranda" class="active" style="text-align:center; flex:1;">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" width="24" height="24" viewBox="0 0 24 24" style="margin:auto;">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h5m4 0h5a1 1 0 001-1V10" />
+    </svg>
+    <div style="font-size:12px;">Beranda</div>
+  </a>
+  
+  <a onclick="navigateTo('explore')" id="btn-explore" style="text-align:center; flex:1;">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" width="24" height="24" viewBox="0 0 24 24" style="margin:auto;">
+      <circle cx="11" cy="11" r="8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+    <div style="font-size:12px;">Explore</div>
+  </a>
+</div>
+
+<!-- Explore -->
+<section id="explore" style="display:none; padding:24px; max-width:800px; margin:auto;">
+  
+  <!-- Search Bar -->
+  <div style="display:flex; align-items:center; gap:10px; background:#f0f0f0; padding:10px 16px; border-radius:30px; margin-bottom:20px; position:relative;">
+    
+    <!-- Tombol Kembali (hanya tampil di PC saat pencarian aktif) -->
+    <button id="backButton" onclick="clearSearch()" style="display:none; position:absolute; left:-48px; background:none; border:none; font-size:20px; cursor:pointer;">
+      ←
+    </button>
+    
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+    
+    <input type="text" id="searchExplore" placeholder="Cari konten..." oninput="searchExploreContent()" style="flex:1; border:none; outline:none; background:transparent; font-size:16px;">
+  </div>
+  
+  <!-- HASIL PENCARIAN -->
+  <div id="searchResults" style="display:none; flex-direction: column; gap: 24px;">
+    <div>
+      <h2 style="margin-bottom: 12px;">Akun</h2>
+      <div id="userResults" style="display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px;"></div>
+    </div>
+    <div>
+      <h2 style="margin-bottom: 12px;">Konten</h2>
+      <div id="postResults" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px;"></div>
+    </div>
+  </div>
+  
+  <!-- TRENDING -->
+  <div id="trendingSection">
+    <h2 style="font-size:20px; margin-bottom:12px;">🔥 Trending Sekarang</h2>
+    <div id="exploreContent" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px;"></div>
+  </div>
+</section>
+
+<!-- Notifikasi -->
+<section id="notifikasi" style="display:none; padding: 24px; max-width: 800px; margin: auto;">
+  
+  <!-- Tombol Kembali -->
+  <button onclick="navigateTo('beranda')" style="background:none; border:none; color:black; display:flex; align-items:center; gap:6px; font-size:16px; margin-bottom:20px; cursor:pointer;">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" width="20" height="20" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+    </svg>
+    Kembali
+  </button>
+  
+  <!-- Judul Notifikasi -->
+  <h1 style="font-size: 24px; margin-bottom: 16px; display: flex; align-items: center;">
+    <svg width="24" height="24" fill="currentColor" style="margin-right: 8px;" viewBox="0 0 24 24">
+      <path d="M12 2C10.07 2 8.5 3.57 8.5 5.5V6.09C5.71 7.14 4 9.75 4 12.7V18L2 20V21H22V20L20 18V12.7C20 9.75 18.29 7.14 15.5 6.09V5.5C15.5 3.57 13.93 2 12 2ZM12 24C13.1 24 14 23.1 14 22H10C10 23.1 10.9 24 12 24Z" />
+    </svg>
+    Notifikasi
+  </h1>
+  
+  <!-- Isi Notifikasi -->
+  <div id="notifList">Memuat notifikasi...</div>
+</section>
+
+<!-- === Halaman Daftar Pesan (Instagram-style) + Chat Page === -->
+<section id="pesan" style="display:none; flex-direction:column; background:#fff; height:100vh; color:#000;">
+
+  <!-- Header DM -->
+  <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid #ddd;">
+    <button onclick="navigateTo('beranda')" style="background:none; border:none;">
+      <svg width="24" height="24" fill="black" viewBox="0 0 24 24">
+        <path d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+    <h2 style="font-size:20px; font-weight:600;">Pesan</h2>
+    <button onclick="buatPesanBaru()" style="background:none; border:none;">
+      <svg width="24" height="24" fill="black" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
   </div>
 
-  <div id="posts"></div>
+  <!-- Search & Filter -->
+  <div style="display:flex; gap:8px; padding:12px; border-bottom:1px solid #eee;">
+    <input type="text" id="searchPesan" placeholder="Cari pesan..." oninput="filterPesan()" style="flex:1; padding:10px; border-radius:8px; border:1px solid #ccc;" />
+    <select id="filterKategori" onchange="filterPesan()" style="padding:10px; border-radius:8px; border:1px solid #ccc;">
+      <option value="">Semua</option>
+      <option value="pribadi">Pribadi</option>
+      <option value="sistem">Sistem</option>
+    </select>
+  </div>
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+<div id="daftarPesan" style="flex:1; overflow-y:auto;">
+  <!-- Akan diisi lewat JavaScript -->
+</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCIDtHVWRQiB-tmOWSK4mnexR_J2SAq790",
-      authDomain: "funhub-3f848.firebaseapp.com",
-      projectId: "funhub-3f848",
-      storageBucket: "funhub-3f848.firebasestorage.app",
-      messagingSenderId: "922163960068",
-      appId: "1:922163960068:web:ab2fd526a8ac67fe095851",
-      measurementId: "G-83LMJ1RV1V"
-    };
+  <!-- === Message Page (Chat View) === -->
+  <section id="messagePage" style="display:none; flex-direction:column; position:fixed; inset:0; background:#fff; color:#000; z-index:99;">
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    <!-- Header Chat -->
+    <div style="display:flex; align-items:center; padding:12px; border-bottom:1px solid #eee; background:#fafafa;">
+      <button onclick="closeMessagePage()" style="margin-right:12px; background:none; border:none;">
+        <svg width="24" height="24" fill="black" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <img src="https://api.dicebear.com/7.x/personas/svg?seed=random" style="width:32px; height:32px; border-radius:50%; margin-right:8px;">
+      <div>
+        <strong id="chatUsername">Username</strong>
+        <div id="chatStatus" style="font-size:12px; color:gray;">Offline</div>
+      </div>
+    </div>
 
-    async function addPost() {
-      const title = document.getElementById('title').value;
-      const desc = document.getElementById('desc').value;
-      const media = document.getElementById('media').value;
+    <!-- Chat Messages -->
+    <div id="chatMessages" style="flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
+      <!-- Chat items -->
+    </div>
 
-      if (title && media) {
-        await addDoc(collection(db, "posts"), {
-          title, desc, media, time: Date.now()
-        });
-        document.getElementById('title').value = '';
-        document.getElementById('desc').value = '';
-        document.getElementById('media').value = '';
-      }
+    <!-- Typing -->
+    <div id="typingIndicator" style="padding:4px 12px; font-size:13px; color:#666; display:none;">Sedang mengetik...</div>
+
+    <!-- Input Chat -->
+    <div style="display:flex; align-items:center; padding:10px; border-top:1px solid #eee;">
+      <input 
+        type="text" 
+        id="chatInput" 
+        placeholder="Ketik pesan..." 
+        oninput="toggleSendIcon()" 
+        onkeydown="checkEnter(event)" 
+        style="flex:1; padding:10px; border:none; outline:none; font-size:15px;"
+      >
+      <button 
+        id="sendBtn" 
+        onclick="sendMessage()" 
+        style="display:none; background:none; border:none; margin-left:8px;"
+      >
+        <svg width="24" height="24" fill="#007bff" viewBox="0 0 24 24">
+          <path d="M2 21l21-9L2 3v7l15 2-15 2z"/>
+        </svg>
+      </button>
+      <button onclick="openMediaOptions()" style="background:none; border:none;">
+        <svg width="24" height="24" fill="gray" viewBox="0 0 24 24">
+          <path d="M12 2a10 10 0 100 20 10 10 0 000-20zM10 14l-2-2 4-4 4 4-2 2-2-2-2 2z"/>
+        </svg>
+      </button>
+    </div>
+
+  </section>
+  </section>
+
+<!-- Profil Diri -->
+<section id="lihat-profil" style="display:none; padding:24px; max-width:800px; margin:auto;">
+  <div style="display:flex; align-items:center; gap:24px;">
+    <img id="myAvatar" src="https://i.pravatar.cc/100" style="width:100px; height:100px; border-radius:50%;">
+    <div>
+      <h2 id="myUsername" style="margin:0;">@anon</h2>
+      <p id="myStats" style="color:#555; margin-top:4px;">0 posts • 0 followers • 0 following</p>
+      <button style="margin-top:8px; padding:6px 16px; border-radius:6px; border:1px solid #ccc;">Edit Profil</button>
+    </div>
+  </div>
+  <div id="profilSayaGrid" style="margin-top:24px; display:grid; grid-template-columns:repeat(3,1fr); gap:8px;"></div>
+</section>
+
+<!-- Profil Orang Lain -->
+<section id="profil-user" style="display:none; padding:24px; max-width:800px; margin:auto;">
+  <div style="display:flex; align-items:center; gap:24px;">
+    <img id="otherAvatar" src="https://i.pravatar.cc/100" style="width:100px; height:100px; border-radius:50%;">
+    <div>
+      <h2 id="profilUsername" style="margin:0;">@username</h2>
+      <p id="profilStats" style="color:#555; margin-top:4px;">0 posts • 0 followers • 0 following</p>
+      <button id="btnFollow" onclick="toggleFollow()" style="margin-top:8px; padding:6px 16px; border-radius:6px; border:none; background:#111; color:white;">Follow</button>
+    </div>
+  </div>
+  <div id="profilLainGrid" style="margin-top:24px; display:grid; grid-template-columns:repeat(3,1fr); gap:8px;"></div>
+</section>
+
+<!-- Pengaturan -->
+<section id="pengaturan" style="display:none; padding:24px; max-width:600px; margin:auto; font-family:sans-serif;">
+
+<!-- Tombol Kembali -->
+<button onclick="navigateTo('beranda')" style="background:none; border:none; color:black; display:flex; align-items:center; gap:6px; font-size:16px; margin-bottom:20px; cursor:pointer;">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" width="20" height="20" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+  </svg>
+  Kembali
+</button>
+
+  <!-- Judul dan Ikon -->
+  <h2 style="font-size:24px; margin-bottom:20px; display:flex; align-items:center; gap:10px;">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" width="24" height="24" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M12 1v2m6.364 2.636l-1.414 1.414M21 12h-2M6.364 4.05L4.95 5.464M3 12H1m4.636 5.364l1.414 1.414M12 21v2m5.364-2.636l1.414-1.414M4.05 17.636L5.464 16.22" />
+      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" />
+    </svg>
+    Pengaturan
+  </h2>
+  
+  <div style="background:#fff; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); padding:16px; display:flex; flex-direction:column; gap:16px;">
+    
+    <div onclick="alert('Belum tersedia')" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 1012 21v-1M16 9l-4 4m0 0l-4-4m4 4V3" />
+      </svg>
+      <span>Ubah Password</span>
+    </div>
+    
+    <div onclick="alert('Belum tersedia')" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      <span>Privasi & Keamanan</span>
+    </div>
+    
+    <div onclick="alert('Belum tersedia')" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 9.75a3 3 0 014.5 0M15 15a3 3 0 01-6 0" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>Notifikasi</span>
+    </div>
+    
+    <div onclick="alert('Berhasil logout')" style="display:flex; align-items:center; gap:12px; color:#d00; cursor:pointer;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h6a2 2 0 002-2V5a2 2 0 00-2-2H3" />
+      </svg>
+      <span>Logout</span>
+    </div>
+    
+  </div>
+</section>
+
+<!-- LOGIN -->
+<section id="login" style="display:none; padding: 24px; max-width: 400px; margin: auto;">
+  <!-- Tombol Kembali -->
+  <button onclick="navigateTo('beranda')" style="background: none; border: none; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: #555; cursor: pointer;">
+    <svg width="20" height="20" fill="currentColor"><path d="M15 4l-6 6 6 6"/></svg> Kembali
+  </button>
+
+  <!-- Judul -->
+  <h1 style="font-size: 28px; margin-bottom: 24px; display:flex; align-items:center; gap:10px;">
+    <svg width="28" height="28" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4S8 5.79 8 8s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    Masuk ke 9AnonGag
+  </h1>
+
+  <!-- Form -->
+  <input type="text" placeholder="Username" style="width:100%; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ccc;">
+  <input type="password" placeholder="Password" style="width:100%; padding:12px; border-radius:8px; margin-bottom:20px; border:1px solid #ccc;">
+  <button style="width:100%; padding:12px; background:#111; color:white; border:none; border-radius:8px;">🔐 Masuk</button>
+
+  <!-- Ke Daftar -->
+  <p style="margin-top: 20px; text-align: center; font-size: 14px;">
+    Belum punya akun? <a href="#" onclick="navigateTo('daftar')" style="color:#2196f3;">Daftar</a>
+  </p>
+</section>
+
+<!-- DAFTAR -->
+<section id="daftar" style="display:none; padding: 24px; max-width: 400px; margin: auto;">
+  <!-- Tombol Kembali -->
+  <button onclick="navigateTo('beranda')" style="background: none; border: none; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: #555; cursor: pointer;">
+    <svg width="20" height="20" fill="currentColor"><path d="M15 4l-6 6 6 6"/></svg> Kembali
+  </button>
+
+  <!-- Judul -->
+  <h1 style="font-size: 28px; margin-bottom: 24px; display:flex; align-items:center; gap:10px;">
+    <svg width="28" height="28" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4S8 5.79 8 8s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    Daftar Akun Baru
+  </h1>
+
+  <!-- Form -->
+  <input type="text" placeholder="Username" style="width:100%; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ccc;">
+  <input type="email" placeholder="Email" style="width:100%; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ccc;">
+  <input type="password" placeholder="Password" style="width:100%; padding:12px; border-radius:8px; margin-bottom:20px; border:1px solid #ccc;">
+  <button style="width:100%; padding:12px; background:#111; color:white; border:none; border-radius:8px;">📝 Daftar</button>
+
+  <!-- Ke Login -->
+  <p style="margin-top: 20px; text-align: center; font-size: 14px;">
+    Sudah punya akun? <a href="#" onclick="navigateTo('login')" style="color:#2196f3;">Masuk</a>
+  </p>
+</section>
+
+<!-- Popup Login -->
+<div id="loginPopup" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+">
+  <div style="background: white; padding: 20px 24px; border-radius: 12px; max-width: 300px; text-align: center; color: black;">
+    <h3 style="margin-bottom: 12px;">Silakan login dulu</h3>
+    <button onclick="redirectToLogin()" style="background: #007bff; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer;">
+      Masuk Sekarang
+    </button>
+  </div>
+</div>
+
+
+
+<!-- Beranda dengan Banner Slider Iklan -->
+<section id="beranda" class="active" style="padding: 16px; max-width: 900px; margin: auto;">
+  <div style="position: relative; overflow: hidden; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+    <div id="slider" style="display: flex; transition: transform 0.8s ease;">
+      <!-- Slide 1 -->
+      <div style="min-width: 100%; position: relative;">
+        <img src="https://source.unsplash.com/1200x400/?promo,fun" style="width: 100%; height: auto; object-fit: cover;">
+        <div style="position:absolute; top:20%; left:5%; color:white; text-shadow:0 2px 4px rgba(0,0,0,0.6);">
+          <h2 style="font-size: 28px; margin-bottom: 8px;">🎉 Promo Meme Mingguan</h2>
+          <p style="margin-bottom: 12px;">Upload meme terbaikmu & menangkan hadiah!</p>
+          <button style="padding:10px 20px; background:#ff5722; border:none; color:white; border-radius:6px; cursor:pointer;">Ikuti Sekarang</button>
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div style="min-width: 100%; position: relative;">
+        <img src="https://source.unsplash.com/1200x400/?advertising,community" style="width: 100%; height: auto; object-fit: cover;">
+        <div style="position:absolute; top:20%; left:5%; color:white; text-shadow:0 2px 4px rgba(0,0,0,0.6);">
+          <h2 style="font-size: 28px; margin-bottom: 8px;">📢 Pasang Iklan Kamu</h2>
+          <p style="margin-bottom: 12px;">Promosikan produk atau komunitasmu di 9AnonGag.</p>
+          <button style="padding:10px 20px; background:#4caf50; border:none; color:white; border-radius:6px; cursor:pointer;">Hubungi Kami</button>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div style="min-width: 100%; position: relative;">
+        <img src="https://source.unsplash.com/1200x400/?event,contest" style="width: 100%; height: auto; object-fit: cover;">
+        <div style="position:absolute; top:20%; left:5%; color:white; text-shadow:0 2px 4px rgba(0,0,0,0.6);">
+          <h2 style="font-size: 28px; margin-bottom: 8px;">🏆 Kontes Mingguan</h2>
+          <p style="margin-bottom: 12px;">Ayo ikut voting konten paling lucu minggu ini!</p>
+          <button style="padding:10px 20px; background:#2196f3; border:none; color:white; border-radius:6px; cursor:pointer;">Lihat Kontes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dot navigasi -->
+    <div id="sliderDots" style="position:absolute; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:6px;">
+      <div class="dot active-dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+
+  <!-- Bar Postingan -->
+  <div onclick="openPostModal()" style="background: white; padding: 12px 16px; border-radius: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer; margin-bottom: 24px;">
+    <img src="https://i.pravatar.cc/40" style="width:40px; height:40px; border-radius:50%;">
+    <div style="flex: 1; background: #f0f2f5; border-radius: 20px; padding: 10px 16px; color: #666;">
+      Apa yang kamu pikirkan?
+    </div>
+  </div>
+
+
+<!-- Modal Buat Postingan -->
+<div id="postModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+  <div style="background:white; border-radius:12px; padding:20px; max-width:500px; width:90%; box-shadow: 0 8px 24px rgba(0,0,0,0.2); position: relative; max-height:90vh; overflow-y:auto;">
+    
+    <button type="button" onclick="cancelPost()" style="display: flex; align-items: center; gap: 6px; background: none; border: none; font-size: 16px; cursor: pointer; color: #333;">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
+      Kembali
+    </button>
+
+    <h3 style="text-align:center; margin-bottom: 16px;">📝 Buat Postingan</h3>
+
+    <!-- Judul -->
+    <div style="display:flex; align-items:center; margin-bottom:10px;">
+      <input id="title" placeholder="Judul postingan..." oninput="checkPreviewDisplay()" style="flex:1; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" />
+    </div>
+
+    <!-- Preview -->
+    <div id="preview" style="margin-bottom: 16px; display: none;">
+      <p style="font-weight: bold; margin-bottom: 8px;">📸 Preview:</p>
+      <div id="previewContainer" style="border: 1px solid #ccc; border-radius: 8px; overflow: hidden; max-height: 300px;"></div>
+    </div>
+
+    <!-- Deskripsi -->
+    <textarea id="desc" placeholder="Deskripsi, bisa #hashtag atau @mention..." rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; resize: vertical; margin-bottom:10px;"></textarea>
+
+    <!-- Input Upload File -->
+    <label for="uploadFile" style="display:flex; align-items:center; gap:10px; margin-bottom:12px; cursor:pointer;">
+      <svg width="20" height="20" fill="gray" viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zm7-18L5.33 9h3.34v4h6.66V9h3.34L12 2z"/></svg>
+      <span>Upload Gambar / Video</span>
+    </label>
+    <input type="file" id="uploadFile" accept="image/*,video/*" style="display:none;" onchange="handleFileUpload()" />
+
+    <!-- Input Link Media -->
+    <div style="display:flex; align-items:center; gap:10px; border:1px solid #ccc; border-radius:8px; padding:10px; margin-bottom:16px;">
+      <svg width="20" height="20" fill="gray" viewBox="0 0 24 24"><path d="M3.9,12c0,1.71,1.39,3.1,3.1,3.1H9v1.45H7c-2.5,0-4.55-2.05-4.55-4.55S4.5,7.45,7,7.45h2V8.9H7C5.29,8.9,3.9,10.29,3.9,12z M8,11.25h8v1.5H8V11.25z M17,7h-2v1.45h2c1.71,0,3.1,1.39,3.1,3.1s-1.39,3.1-3.1,3.1h-2V14.1h2c1.16,0,2.1-0.94,2.1-2.1S18.16,9.9,17,9.9z"/></svg>
+      <input type="text" id="media" placeholder="Link .jpg / .mp4 / YouTube..." oninput="handleLinkInput()" style="flex:1; border:none; outline:none; font-size:14px;" />
+    </div>
+
+    <!-- Tombol Posting -->
+    <button onclick="addPost()" style="padding: 12px 24px; background: #111; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">🚀 Posting</button>
+  </div>
+</div>
+
+<!-- Container Postingan -->
+<div id="postContainer" style="
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  padding: 16px;
+"></div>
+
+<!-- Popup Komentar -->
+<div id="commentPopup" style="
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  color: #000;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  max-height: 60%;
+  overflow-y: auto;
+  display: none;
+  flex-direction: column;
+  z-index: 9999;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+">
+  <!-- Header Komentar -->
+  <div style="
+    padding: 12px;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+  ">
+    Komentar
+  </div>
+  
+  <!-- Daftar Komentar -->
+  <div id="commentList" style="flex: 1; padding: 12px;"></div>
+  
+  <!-- Input Komentar -->
+  <div style="display: flex; border-top: 1px solid #ddd;">
+    <input id="commentInput" type="text" placeholder="Tulis komentar..." style="
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+    " />
+    <button onclick="sendComment()" style="
+      padding: 10px 16px;
+      border: none;
+      background: #007bff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    ">Kirim</button>
+  </div>
+</div>
+
+<script>
+function openMessagePage(username) {
+  document.getElementById("pesan").querySelector("#messagePage").style.display = "flex";
+  document.getElementById("chatUsername").innerText = username;
+  document.getElementById("chatStatus").innerText = "Online";
+  document.getElementById("chatMessages").innerHTML = ""; // reset isi chat
+}
+
+function closeMessagePage() {
+  document.getElementById("pesan").querySelector("#messagePage").style.display = "none";
+}
+
+function buatPesanBaru() {
+  alert("Fitur pesan baru belum tersedia.");
+}
+
+function toggleSendIcon() {
+  const input = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("sendBtn");
+  sendBtn.style.display = input.value.trim() ? "block" : "none";
+}
+
+function checkEnter(event) {
+  if (event.key === "Enter") sendMessage();
+}
+
+function sendMessage() {
+  const input = document.getElementById("chatInput");
+  if (!input.value.trim()) return;
+  const pesan = input.value.trim();
+
+  const bubble = document.createElement("div");
+  bubble.textContent = pesan;
+  bubble.style.alignSelf = "flex-end";
+  bubble.style.background = "#007bff";
+  bubble.style.color = "#fff";
+  bubble.style.padding = "10px 14px";
+  bubble.style.borderRadius = "16px";
+  bubble.style.maxWidth = "80%";
+  bubble.style.fontSize = "14px";
+
+  document.getElementById("chatMessages").appendChild(bubble);
+  input.value = "";
+  toggleSendIcon();
+}
+</script>
+
+
+<script>
+function toggleLike(postId) {
+if (!currentUser) return showLoginPopup();
+// lanjutkan fungsi like
+}
+
+function toggleDislike(postId) {
+if (!currentUser) return showLoginPopup();
+// lanjutkan fungsi dislike
+}
+
+function openComments(postId) {
+if (!currentUser) return showLoginPopup();
+// tampilkan popup komentar
+}
+</script>
+
+<script>
+document.addEventListener("click", function(e) {
+const popup = document.getElementById("loginPopup");
+if (e.target === popup) {
+popup.style.display = "none";
+}
+});
+</script>
+
+<script>
+function showLoginPopup() {
+  document.getElementById("loginPopup").style.display = "flex";
+}
+
+function redirectToLogin() {
+  window.location.href = "#login"; // atau ganti dengan "/login.html" jika pakai halaman terpisah
+}
+</script>
+
+<script>
+  let currentUser = null;
+
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+  });
+</script>
+
+
+<script>
+  async function searchExploreContent() {
+    const keyword = document.getElementById("searchExplore").value.trim().toLowerCase();
+    const searchResults = document.getElementById("searchResults");
+    const trending = document.getElementById("trendingSection");
+    const backBtn = document.getElementById("backButton");
+    
+    if (keyword.length === 0) {
+      searchResults.style.display = "none";
+      trending.style.display = "block";
+      backBtn.style.display = "none";
+      return;
+    }
+    
+    // Tampilkan hasil pencarian, sembunyikan trending
+    searchResults.style.display = "flex";
+    trending.style.display = "none";
+    
+    // Tampilkan tombol kembali hanya di desktop
+    if (window.innerWidth >= 768) {
+      backBtn.style.display = "block";
+    }
+    
+    // 🔍 Cari akun
+    const userSnap = await getDocs(query(collection(db, "users")));
+    const matchedUsers = userSnap.docs.map(d => d.data()).filter(user =>
+      (user.username || '').toLowerCase().includes(keyword)
+    );
+    
+    // 🔍 Cari post
+    const postSnap = await getDocs(query(collection(db, "posts")));
+    const matchedPosts = postSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(post =>
+        (post.title || '').toLowerCase().includes(keyword) ||
+        (post.desc || '').toLowerCase().includes(keyword)
+      );
+    
+    renderUserResults(matchedUsers);
+    renderPostResults(matchedPosts);
+  }
+  
+  function clearSearch() {
+    document.getElementById("searchExplore").value = "";
+    searchExploreContent(); // Akan otomatis sembunyikan searchResults
+  }
+</script>
+
+<script>
+function renderPostResults(posts) {
+const postResults = document.getElementById("postResults");
+postResults.innerHTML = "";
+
+posts.forEach(post => {
+const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(post.mediaURL);
+const isVideo = /\.(mp4|webm|ogg)$/i.test(post.mediaURL);
+const isYoutube = post.mediaURL.includes("youtube.com") || post.mediaURL.includes("youtu.be");
+
+let mediaHTML = "";
+if (isImage) {
+mediaHTML = `<img src="${post.mediaURL}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;" />`;
+} else if (isVideo) {
+mediaHTML = `<video src="${post.mediaURL}" muted autoplay loop playsinline style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;"></video>`;
+} else if (isYoutube) {
+const youtubeID = post.mediaURL.split("v=")[1]?.split("&")[0] || post.mediaURL.split("/").pop();
+mediaHTML = `<iframe src="https://www.youtube.com/embed/${youtubeID}" frameborder="0" allowfullscreen style="width: 100%; height: 200px; border-radius: 8px;"></iframe>`;
+}
+
+postResults.innerHTML += `
+<div style="position: relative;">
+  ${mediaHTML}
+  <div style="position: absolute; bottom: 6px; left: 6px; background: rgba(0,0,0,0.5); color: white; padding: 2px 6px; font-size: 12px; border-radius: 4px;">
+    ${post.title || 'Tanpa Judul'}
+  </div>
+</div>
+`;
+});
+}
+</script>
+
+<script>
+function renderUserResults(users) {
+  const userResults = document.getElementById("userResults");
+  userResults.innerHTML = "";
+
+  users.forEach(user => {
+    userResults.innerHTML += `
+      <div style="flex: 0 0 auto; width: 80px; text-align: center;">
+        <img src="${user.photoURL || 'https://i.pravatar.cc/100'}" 
+             style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #333;" />
+        <div style="font-size: 12px; color: #000; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          ${user.username || 'Pengguna'}
+        </div>
+      </div>
+    `;
+  });
+}
+</script>
+    
+<script>
+let currentPostId = null;
+
+window.openComments = async function(postId) {
+currentPostId = postId;
+document.getElementById("commentPopup").style.display = "flex";
+
+const postRef = doc(db, "posts", postId);
+const postSnap = await getDoc(postRef);
+const data = postSnap.data();
+
+const list = document.getElementById("commentList");
+list.innerHTML = "";
+
+if (data.comments && data.comments.length) {
+data.comments.forEach(comment => {
+const div = document.createElement("div");
+div.textContent = comment;
+div.style.padding = "6px 0";
+list.appendChild(div);
+});
+} else {
+list.innerHTML = "<p style='color:gray;'>Belum ada komentar.</p>";
+}
+};
+
+window.sendComment = async function() {
+const input = document.getElementById("commentInput");
+const text = input.value.trim();
+if (!text || !currentPostId) return;
+
+const postRef = doc(db, "posts", currentPostId);
+const postSnap = await getDoc(postRef);
+const data = postSnap.data();
+const comments = data.comments || [];
+
+comments.push(text);
+
+await updateDoc(postRef, { comments });
+
+input.value = "";
+openComments(currentPostId); // refresh komentar
+};
+
+// Tutup popup kalau klik di luar area
+window.onclick = function(e) {
+const popup = document.getElementById("commentPopup");
+if (popup.style.display === "flex" && !popup.contains(e.target) && e.target.tagName !== "BUTTON") {
+popup.style.display = "none";
+}
+};
+</script>
+    
+    
+<script>
+async function likePost(id) {
+const refPost = doc(db, "posts", id);
+await updateDoc(refPost, { likes: increment(1) });
+}
+
+async function dislikePost(id) {
+const refPost = doc(db, "posts", id);
+await updateDoc(refPost, { dislikes: increment(1) });
+}
+
+function commentPost(id) {
+alert("Fitur komentar belum ditambahkan");
+}
+
+function sharePost(id, title) {
+const url = location.origin + "/?post=" + id;
+navigator.clipboard.writeText(url);
+alert("Link disalin: " + url);
+}
+</script>
+
+<script>
+const postContainer = document.getElementById("postContainer");
+const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+
+onSnapshot(q, (snapshot) => {
+  postContainer.innerHTML = "";
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    const id = doc.id;
+    
+    const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(data.mediaURL);
+    const isVideo = /\.(mp4|webm|ogg)$/i.test(data.mediaURL);
+    const isYoutube = data.mediaURL.includes("youtube.com") || data.mediaURL.includes("youtu.be");
+    
+    let mediaHTML = "";
+    if (isImage) {
+      mediaHTML = `<img src="${data.mediaURL}" class="post-media" />`;
+    } else if (isVideo) {
+      mediaHTML = `<video src="${data.mediaURL}" class="post-media" controls></video>`;
+    } else if (isYoutube) {
+      const youtubeID = data.mediaURL.split("v=")[1]?.split("&")[0] || data.mediaURL.split("/").pop();
+      mediaHTML = `<iframe src="https://www.youtube.com/embed/${youtubeID}" class="post-media" frameborder="0" allowfullscreen></iframe>`;
+    }
+    
+    postContainer.innerHTML += `
+      <div class="post-card">
+        ${mediaHTML}
+        <div class="post-content">
+          <strong>${data.title || "Tanpa Judul"}</strong>
+          <p style="font-size: 14px; color: #666;">${data.desc || ""}</p>
+        </div>
+        <div class="post-actions" style="display:flex; gap:8px; margin-top:8px;">
+          <!-- Like -->
+          <button onclick="toggleLike('${id}')" id="likeBtn-${id}" style="background:none; border:none; cursor:pointer;">
+            <svg id="likeIcon-${id}" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 24 24">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 
+                       4 4 6.5 4c1.74 0 3.41 1.01 
+                       4.5 2.09C12.09 5.01 13.76 4 
+                       15.5 4 18 4 20 6 20 
+                       8.5c0 3.78-3.4 6.86-8.55 
+                       11.54L12 21.35z" />
+            </svg>
+          </button>
+
+          <!-- Dislike -->
+          <button onclick="toggleDislike('${id}')" id="dislikeBtn-${id}" style="background:none; border:none; cursor:pointer;">
+            <svg id="dislikeIcon-${id}" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 24 24">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 2.54 1.21 
+                       4.79 3.17 6.24L12 22l3.83-6.76C17.79 
+                       13.79 19 11.54 19 9c0-3.87-3.13-7-7-7zM12 
+                       12.5l-1.41-1.41L12 9.67l1.41 1.42L12 
+                       12.5z" />
+            </svg>
+          </button>
+
+          <!-- Komentar -->
+          <button onclick="openComments('${id}')" style="background: none; border: none; cursor: pointer;">
+            <svg width="20" height="20" fill="gray" viewBox="0 0 24 24">
+              <path d="M21 6.5l-1.41-1.41L17 7.67V3h-2v4.67L10.41 5.09 9 6.5 15 12l6-5.5zM6 8h2v12H6z" />
+            </svg>
+          </button>
+
+          <!-- Share -->
+          <button onclick="sharePost('${id}', '${data.title || ""}')">
+            🔗
+          </button>
+        </div>
+      </div>
+    `;
+  });
+});
+</script>
+
+<script>
+function tampilkanGambarTanpaCache(namaFile, elemenID) {
+const fileRef = ref(storage, namaFile);
+getDownloadURL(fileRef).then((url) => {
+const freshUrl = url + '?t=' + Date.now();
+document.getElementById(elemenID).src = freshUrl;
+});
+}
+
+// Contoh penggunaan
+tampilkanGambarTanpaCache('user1/foto.jpg', 'imgPreview');
+</script>
+
+<script>
+// Tambahkan timestamp agar URL selalu unik
+const fileRef = ref(storage, 'gambar.jpg');
+getDownloadURL(fileRef).then((url) => {
+const freshUrl = url + '?t=' + Date.now();
+document.getElementById('imgPreview').src = freshUrl;
+});
+</script>
+
+<script>
+  const slider = document.getElementById("slider");
+  const dots = document.querySelectorAll("#sliderDots .dot");
+  let index = 0;
+  
+  function showSlide(i) {
+    slider.style.transform = `translateX(-${i * 100}%)`;
+    dots.forEach(dot => dot.classList.remove("active-dot"));
+    dots[i].classList.add("active-dot");
+  }
+  
+  setInterval(() => {
+    index = (index + 1) % 3;
+    showSlide(index);
+  }, 5000);
+</script>
+
+<script type="module">
+  // Import Firebase SDK
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, getDocs, onSnapshot,
+    query, orderBy, doc, updateDoc, deleteDoc,
+    serverTimestamp, increment, getDoc
+  } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+  import {
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+  import {
+    getStorage, ref, uploadBytes, getDownloadURL
+  } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-storage.js";
+
+  // Konfigurasi Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyCIDtHVWRQiB-tmOWSK4mnexR_J2SAq790",
+    authDomain: "funhub-3f848.firebaseapp.com",
+    projectId: "funhub-3f848",
+    storageBucket: "funhub-3f848.appspot.com",
+    messagingSenderId: "922163960068",
+    appId: "1:922163960068:web:ab2fd526a8ac67fe095851"
+  };
+
+  // Inisialisasi Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+  const storage = getStorage(app);
+
+  // ======================== AUTH ========================
+  window.registerUser = async function(email, password) {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert('Akun berhasil dibuat');
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  window.loginUser = async function(email, password) {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert('Login berhasil');
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  window.logoutUser = async function() {
+    await signOut(auth);
+    alert('Logout berhasil');
+  };
+
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      console.log("Login sebagai:", user.email);
+      // Tampilkan UI user
+    } else {
+      console.log("Tidak login");
+    }
+  });
+
+  // ======================== POSTING ========================
+  window.addPost = async function() {
+    const title = document.getElementById('title').value;
+    const desc = document.getElementById('desc').value;
+    const fileInput = document.getElementById('mediaInput');
+    let mediaURL = "";
+
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      const storageRef = ref(storage, 'posts/' + Date.now() + '_' + file.name);
+      const snapshot = await uploadBytes(storageRef, file);
+      mediaURL = await getDownloadURL(snapshot.ref);
     }
 
-    function renderPosts(data) {
-      const posts = document.getElementById('posts');
-      posts.innerHTML = '';
-      data.forEach(doc => {
-        const post = doc.data();
-        const el = document.createElement('div');
-        el.className = 'card';
-        const isVideo = post.media.includes('.mp4') || post.media.includes('youtube');
-        el.innerHTML = `
-          ${isVideo ? `<video src="${post.media}" controls></video>` : `<img src="${post.media}" alt="media" />`}
-          <h3>${post.title}</h3>
-          <p>${post.desc}</p>
-        `;
-        posts.appendChild(el);
-      });
-    }
-
-    // Load posts realtime
-    onSnapshot(collection(db, "posts"), (snapshot) => {
-      renderPosts(snapshot.docs);
+    await addDoc(collection(db, 'posts'), {
+      title,
+      desc,
+      mediaURL,
+      createdAt: serverTimestamp(),
+      likes: 0,
+      dislikes: 0,
+      comments: []
     });
-  </script>
 
+    alert("Post berhasil diupload");
+  };
+
+  // ======================== TAMPIL POST ========================
+  window.loadPosts = function(callback) {
+    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+    onSnapshot(q, snapshot => {
+      const posts = [];
+      snapshot.forEach(doc => {
+        posts.push({ id: doc.id, ...doc.data() });
+      });
+      callback(posts);
+    });
+  };
+
+  // ======================== LIKE / DISLIKE ========================
+  window.toggleLike = async function(postId, isLike = true) {
+    const postRef = doc(db, 'posts', postId);
+    const field = isLike ? 'likes' : 'dislikes';
+    await updateDoc(postRef, { [field]: increment(1) });
+  };
+
+  // ======================== KOMENTAR ========================
+  window.addComment = async function(postId, comment) {
+    const postRef = doc(db, 'posts', postId);
+    const postSnap = await getDoc(postRef);
+    const data = postSnap.data();
+    const comments = data.comments || [];
+    comments.push({ text: comment, createdAt: new Date().toISOString() });
+    await updateDoc(postRef, { comments });
+  };
+
+  // ======================== PESAN ========================
+  window.sendMessage = async function(to, message) {
+    await addDoc(collection(db, 'messages'), {
+      to,
+      message,
+      from: auth.currentUser?.email || "Anonim",
+      createdAt: serverTimestamp()
+    });
+  };
+
+  window.loadMessages = function(callback) {
+    const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
+    onSnapshot(q, snapshot => {
+      const messages = [];
+      snapshot.forEach(doc => {
+        messages.push(doc.data());
+      });
+      callback(messages);
+    });
+  };
+
+  // ======================== NOTIFIKASI ========================
+  window.loadNotifications = function(callback) {
+    const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'));
+    onSnapshot(q, snapshot => {
+      const notifs = [];
+      snapshot.forEach(doc => {
+        notifs.push(doc.data());
+      });
+      callback(notifs);
+    });
+  };
+
+  // ======================== SEARCH ========================
+  window.searchPosts = async function(keyword) {
+    const snapshot = await getDocs(collection(db, 'posts'));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(post =>
+        post.title.toLowerCase().includes(keyword.toLowerCase()) ||
+        post.desc.toLowerCase().includes(keyword.toLowerCase())
+      );
+  };
+</script>
+
+    <script>
+    // Show page
+  window.navigateTo = function (pageId) {
+    // Sembunyikan semua section
+    document.querySelectorAll("section").forEach(section => {
+      section.style.display = "none";
+    });
+
+    // Tampilkan section yang dipilih
+    const target = document.getElementById(pageId);
+    if (target) {
+      target.style.display = "block";
+    }
+
+    // Navigasi Bawah: aktif/non-aktif
+    document.querySelectorAll("#nav-bottom a").forEach(link => {
+      link.classList.remove("active");
+    });
+
+    const btn = document.getElementById("btn-" + pageId);
+    if (btn) {
+      btn.classList.add("active");
+    }
+
+    // Dapatkan elemen navigasi atas & bawah
+    const navTop = document.querySelector("header");
+    const navBottom = document.getElementById("nav-bottom");
+
+    // Daftar halaman yang menyembunyikan navigasi atas dan bawah
+    const hideBoth = ["login", "daftar", "pesan", "notifikasi", "pengaturan"];
+    const hideTopOnly = ["lihat-profil", "explore"];
+
+    // Atur visibilitas navigasi atas & bawah
+    if (hideBoth.includes(pageId)) {
+      if (navTop) navTop.style.display = "none";
+      if (navBottom) navBottom.style.display = "none";
+    } else if (hideTopOnly.includes(pageId)) {
+      if (navTop) navTop.style.display = "none";
+      if (navBottom) navBottom.style.display = "flex";
+    } else {
+      if (navTop) navTop.style.display = "flex";
+      if (navBottom) navBottom.style.display = "flex";
+    }
+
+    // Tutup dropdown jika terbuka
+    const dropdown = document.getElementById("dropdown-menu");
+    if (dropdown) dropdown.style.display = "none";
+  };
+
+  // Toggle dropdown profil
+  window.toggleDropdown = function () {
+    const menu = document.getElementById("dropdown-menu");
+    menu.style.display = (menu.style.display === "block") ? "none" : "block";
+  };
+
+  // Tutup dropdown jika klik di luar area
+  window.addEventListener('click', function (e) {
+    const menu = document.getElementById("dropdown-menu");
+    const dropdown = document.querySelector(".dropdown");
+    if (menu && dropdown && !dropdown.contains(e.target)) {
+      menu.style.display = "none";
+    }
+  });
+
+
+// ========== Modal ==========
+window.openPostModal = function() {
+  const modal = document.getElementById("postModal");
+  modal.style.display = "flex";
+  document.getElementById("nav-bottom").style.display = "none";
+};
+
+window.closePostModal = function() {
+  document.getElementById("postModal").style.display = "none";
+  document.getElementById("nav-bottom").style.display = "flex";
+};
+
+window.cancelPost = function() {
+  document.getElementById("postModal").style.display = "none";
+};
+
+// ========== File Preview ==========
+window.handleFileUpload = function() {
+  const file = document.getElementById("uploadFile").files[0];
+  if (!file) return;
+  
+  const preview = document.getElementById("preview");
+  const container = document.getElementById("previewContainer");
+  preview.style.display = "block";
+  container.innerHTML = "";
+  
+  const url = URL.createObjectURL(file);
+  if (file.type.startsWith("image")) {
+    container.innerHTML = `<img src="${url}" style="width:100%;">`;
+  } else if (file.type.startsWith("video")) {
+    container.innerHTML = `<video src="${url}" controls style="width:100%;"></video>`;
+  }
+};
+
+// ========== Link Preview ==========
+window.handleLinkInput = function() {
+  const url = document.getElementById("media").value;
+  const preview = document.getElementById("preview");
+  const container = document.getElementById("previewContainer");
+  
+  if (!url.trim()) {
+    preview.style.display = "none";
+    return;
+  }
+  
+  preview.style.display = "block";
+  if (url.endsWith(".jpg") || url.endsWith(".png")) {
+    container.innerHTML = `<img src="${url}" style="width:100%;">`;
+  } else if (url.endsWith(".mp4")) {
+    container.innerHTML = `<video src="${url}" controls style="width:100%;"></video>`;
+  } else if (url.includes("youtube.com") || url.includes("youtu.be")) {
+    const youtubeID = url.split("v=")[1]?.split("&")[0] || url.split("/").pop();
+    container.innerHTML = `<iframe width="100%" height="250" src="https://www.youtube.com/embed/${youtubeID}" frameborder="0" allowfullscreen></iframe>`;
+  } else {
+    container.innerHTML = `<p style="color:gray;">Preview tidak tersedia</p>`;
+  }
+};
+
+// ========== Post Ke Firebase ==========
+window.addPost = async function() {
+  const title = document.getElementById("title").value;
+  const desc = document.getElementById("desc").value;
+  const mediaLink = document.getElementById("media").value;
+  const fileInput = document.getElementById("uploadFile");
+  
+  let mediaURL = "";
+  
+  if (fileInput.files.length > 0) {
+    const file = fileInput.files[0];
+    const storageRef = ref(storage, 'posts/' + Date.now() + '_' + file.name);
+    const snapshot = await uploadBytes(storageRef, file);
+    mediaURL = await getDownloadURL(snapshot.ref);
+  } else if (mediaLink.trim()) {
+    mediaURL = mediaLink.trim();
+  }
+  
+  await addDoc(collection(db, 'posts'), {
+    title,
+    desc,
+    mediaURL,
+    createdAt: serverTimestamp(),
+    likes: 0,
+    dislikes: 0,
+    comments: []
+  });
+  
+  alert("Postingan berhasil dikirim!");
+  document.getElementById("postModal").style.display = "none";
+  
+  // Reset form
+  document.getElementById("title").value = "";
+  document.getElementById("desc").value = "";
+  document.getElementById("media").value = "";
+  document.getElementById("uploadFile").value = "";
+  document.getElementById("preview").style.display = "none";
+};
+
+// ========== Load Postingan ==========
+window.loadPosts = function() {
+  const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+  
+  onSnapshot(q, snapshot => {
+    const posts = [];
+    snapshot.forEach(doc => {
+      posts.push({ id: doc.id, ...doc.data() });
+    });
+    renderPosts(posts);
+  });
+};
+
+// ========== Render Postingan ke HTML ==========
+function renderPosts(posts) {
+  const container = document.getElementById('postContainer');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  posts.forEach(post => {
+    const card = document.createElement('div');
+    card.style = "background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1);";
+    
+    let mediaHTML = '';
+    if (post.mediaURL.includes("youtube.com") || post.mediaURL.includes("youtu.be")) {
+      const youtubeID = post.mediaURL.split("v=")[1]?.split("&")[0] || post.mediaURL.split("/").pop();
+      mediaHTML = `<iframe width="100%" height="200" src="https://www.youtube.com/embed/${youtubeID}" frameborder="0" allowfullscreen></iframe>`;
+    } else if (post.mediaURL.endsWith(".mp4")) {
+      mediaHTML = `<video src="${post.mediaURL}" controls style="width:100%;"></video>`;
+    } else {
+      mediaHTML = `<img src="${post.mediaURL}" style="width:100%; height:auto;">`;
+    }
+    
+    card.innerHTML = `
+      ${mediaHTML}
+      <div style="padding:12px;">
+        <h4 style="margin:0; font-size:16px;">${post.title}</h4>
+        <p style="color:#555; font-size:14px; margin:4px 0;">${post.desc}</p>
+        <div style="display:flex; justify-content:space-between; margin-top:8px;">
+          <!-- Tombol Like, Dislike, Komentar, Share (placeholder) -->
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// ========== Jalankan Saat Halaman Dimuat ==========
+window.addEventListener('DOMContentLoaded', () => {
+  loadPosts();
+});
+</script>
 </body>
 </html>
