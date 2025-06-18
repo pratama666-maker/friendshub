@@ -2,1539 +2,742 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>9AnonGag</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Funhub Navigation</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    /* General Body Styling */
     body {
+      font-family: 'Poppins', sans-serif;
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      color: #222;
+      padding: 0;
+      background: #121212;
+      color: #fff;
+      display: flex;
+      height: 100vh;
+      overflow: hidden; /* Prevent body scroll, individual pages will scroll */
+      position: relative; /* For auth modal positioning */
     }
 
-    header {
-      background: #fff;
-      padding: 12px 16px;
+    /* Input & Textarea General Styling */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea {
+      width: calc(100% - 30px);
+      padding: 12px 15px;
+      margin-bottom: 15px;
+      border: 1px solid #333;
+      border-radius: 10px;
+      background: #333;
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #00c853;
+      box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.3);
+    }
+
+    /* Button General Styling */
+    button {
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Modal Styling */
+    #commentModal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #commentModalContent {
+      background: #1c1c1c;
+      padding: 25px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    #commentPostPreview {
+        background: #333;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        overflow-y: auto;
+        max-height: 150px; /* Limit height of preview */
+    }
+
+    #commentsList {
+      flex-grow: 1;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      padding-right: 10px; /* For scrollbar */
+    }
+
+    .comment-item {
+      background: #333;
+      padding: 10px 15px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    #commentInputContainer {
+      display: flex;
+      gap: 10px;
+      margin-top: auto; /* Push to bottom */
+    }
+
+    #commentInputContainer input {
+      flex-grow: 1;
+      margin-bottom: 0;
+      border-radius: 20px;
+    }
+
+    #commentInputContainer button {
+      background: #00c853;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+
+    /* Post Card Styling */
+    .post-card {
+        background: #1c1c1c;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        position: relative;
+    }
+
+    .post-card .post-actions > div {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+        color: #fff;
+        cursor: pointer;
+        transition: color 0.2s ease, fill 0.2s ease;
+    }
+
+    .post-card .post-actions > div:hover {
+        color: #00c853;
+    }
+    .post-card .post-actions > div:hover svg {
+        fill: #00c853;
+    }
+
+    /* Active states for like/dislike */
+    .post-card .post-actions > div.active-like {
+        color: #00c853 !important;
+    }
+    .post-card .post-actions > div.active-like svg {
+        fill: #00c853 !important;
+    }
+    .post-card .post-actions > div.active-dislike {
+        color: #f44336 !important;
+    }
+    .post-card .post-actions > div.active-dislike svg {
+        fill: #f44336 !important;
+    }
+
+
+    /* Dropdown Styling */
+    .post-settings-dropdown {
+        display: none;
+        position: fixed; /* Use fixed for proper positioning regardless of scroll */
+        background: #2a2a2a;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        min-width: 150px;
+        z-index: 1000;
+        padding: 8px 0;
+    }
+
+    .post-settings-dropdown div {
+        padding: 10px 15px;
+        cursor: pointer;
+        font-size: 15px;
+        color: #fff;
+        transition: background-color 0.2s ease;
+    }
+
+    .post-settings-dropdown div:hover {
+        background: #3a3a3a;
+    }
+
+    /* Back Button Styling */
+    .back-button {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      width: 40px;
+      height: 40px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: background-color 0.2s ease;
+    }
+
+    .back-button:hover {
+      background: rgba(0,0,0,0.6);
+    }
+
+    .back-button svg {
+      width: 24px;
+      height: 24px;
+      fill: #fff;
+    }
+
+    /* Flexible Page Layout */
+    .flex-page {
+        display: flex;
+        flex-direction: column;
+        height: 100%; /* Occupy full height of parent */
+        overflow: hidden; /* Manage scrolling inside */
+    }
+
+    /* Sidebar Styling */
+    #sidebar {
+      width: 250px;
+      background: #1c1c1c;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 4px 0 15px rgba(0,0,0,0.4);
+    }
+
+    #sidebar .profile-section {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #333;
+      width: 100%;
+    }
+
+    #sidebar .profile-avatar {
+      width: 80px;
+      height: 80px;
+      background: #a259ff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      border: 3px solid #00c853;
+    }
+
+    #sidebar .profile-name {
       font-size: 20px;
       font-weight: bold;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
     }
 
-    nav {
-      display: flex;
-      gap: 12px;
-    }
-
-    nav a {
-      text-decoration: none;
-      color: #222;
-      font-size: 20px;
-    }
-
-    section {
-      display: none;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-
-    section.active {
-      display: block;
-    }
-
-    #form input, #form textarea {
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+    #sidebar .nav-items {
       width: 100%;
-      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    #form button {
-      padding: 10px;
-      background: #222;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
+    #sidebar .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 20px;
+      border-radius: 10px;
       cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    #form button:hover {
-      background: #000;
+    #sidebar .nav-item:hover {
+      background: #333;
     }
 
-    .card {
-      background: #fff;
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-      margin-bottom: 16px;
+    #sidebar .nav-item.active {
+      background: #00c853;
+      color: #000;
+      font-weight: bold;
     }
 
-    .card img, .card video {
-      max-width: 100%;
-      border-radius: 8px;
+    #sidebar .nav-item svg {
+      width: 28px;
+      height: 28px;
+      fill: #fff;
     }
 
-  #nav-bottom a.active svg {
-    stroke: #111;
-  }
-  #nav-bottom a svg {
-    stroke: #888;
-    transition: stroke 0.3s;
-  }
-  #nav-bottom a.active div {
-    color: #111;
-    font-weight: bold;
-  }
-  #nav-bottom a div {
-    color: #888;
-    transition: color 0.3s;
-  }
+    #sidebar .nav-item.active svg {
+      fill: #000;
+    }
 
-.dropdown {
-  position: relative;
-}
+    /* Main Content Area */
+    #mainContent {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden; /* Pages will handle their own scrolling */
+    }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  right: 0;
-  background-color: white;
-  min-width: 160px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
-  z-index: 2000;
-  overflow: hidden;
-}
+    /* Page container */
+    .page {
+      display: none;
+      flex-direction: column; /* Default for pages */
+      flex-grow: 1;
+      overflow-y: auto; /* Enable scrolling for page content */
+      padding-bottom: 80px; /* Space for bottom nav on mobile */
+      box-sizing: border-box;
+      position: relative; /* For back button positioning */
+    }
 
-.dropdown-content a {
-  display: block;
-  padding: 10px 16px;
-  text-decoration: none;
-  color: #222;
-  font-size: 16px;
-}
+    .page.active {
+      display: flex; /* Activate and show the page */
+    }
 
-.dropdown-content a:hover {
-  background-color: #f0f0f0;
-}
-    
+    /* Responsive adjustments (e.g., for PC view) */
+    @media (min-width: 768px) {
+      body {
+        display: flex;
+        flex-direction: row; /* Sidebar and main content side-by-side */
+      }
+
+      #sidebar {
+        display: flex !important; /* Always show sidebar on large screens */
+      }
+
+      #bottomNavBar {
+        display: none !important; /* Hide bottom nav on large screens */
+      }
+
+      .page {
+        padding-bottom: 20px; /* Less padding needed for PC */
+      }
+    }
   </style>
-  
-  
-<style>
-  .dot {
-    width: 10px;
-    height: 10px;
-    background: rgba(255,255,255,0.5);
-    border-radius: 50%;
-    transition: all 0.3s ease;
-  }
-  .active-dot {
-    background: white;
-    transform: scale(1.2);
-  }
-</style>
-
-  <style>
-  /* Responsive helper */
-  @media (max-width: 768px) {
-    .desktop-only {
-      display: none !important;
-    }
-  }
-  
-  @media (min-width: 769px) {
-    .header-search input {
-      width: 240px;
-    }
-  }
-</style>
-  
-  <style>
-  /* Sembunyikan elemen .mobile-only di layar lebar (tablet & desktop) */
-  @media (min-width: 768px) {
-    .mobile-only {
-      display: none !important;
-    }
-  }
-
-  /* Tampilkan .desktop-only hanya di layar lebar */
-  @media (max-width: 767px) {
-    .desktop-only {
-      display: none !important;
-    }
-  }
-</style>
-
-<style>
-.post-card {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.2s ease;
-}
-.post-card:hover {
-  transform: translateY(-4px);
-}
-.post-media {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  max-height: 320px;
-}
-.post-content {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.post-actions {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 12px 12px;
-}
-.post-actions button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  color: #444;
-}
-</style>
-
-<style>
-  #commentPopup::-webkit-scrollbar {
-    width: 6px;
-  }
-  #commentPopup::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 3px;
-  }
-</style>
-  
 </head>
 <body>
 
-<header style="display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: white; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 99;">
-  <!-- Logo -->
-  <div class="logo" style="font-size: 24px; font-weight: bold; color: #007bff;">
-    Fun<span style="color:#111;">Hub</span>
+<div id="authModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px); z-index:9998; align-items:center; justify-content:center;">
+  <div id="loginForm" style="background:#1c1c1c; padding:30px; border-radius:20px; width:90%; max-width:400px; text-align:center; color:#fff; margin:auto; box-shadow: 0 8px 30px rgba(0,0,0,0.6);">
+    <h2>Selamat Datang di Funhub</h2>
+    <input type="email" placeholder="Email" id="loginUsername" /> <input type="password" placeholder="Password" id="loginPassword" />
+    <button onclick="startApp()" style="background:#00c853; color:#fff; border:none; padding:12px 25px; border-radius:25px; font-weight:bold; font-size:16px; margin-top:10px;">Masuk</button>
+    <p style="margin-top:25px; font-size:14px;">Belum punya akun? <span style="color:#00c853; cursor:pointer; font-weight:bold;" onclick="showRegister()">Daftar Sekarang</span></p>
   </div>
-  
-  <!-- Search bar (PC/iPad only) -->
-  <div class="header-search desktop-only" style="margin: 0 20px;">
-    <input type="text" placeholder="Cari konten..." oninput="handleSearch(this.value)" style="padding: 6px 12px; border: 1px solid #ccc; border-radius: 20px;">
+
+  <div id="registerForm" style="display:none; background:#1c1c1c; padding:30px; border-radius:20px; width:90%; max-width:400px; text-align:center; color:#fff; margin:auto; box-shadow: 0 8px 30px rgba(0,0,0,0.6);">
+    <h2>Buat Akun Baru</h2>
+    <input type="text" placeholder="Username" id="registerUsername" />
+    <input type="email" placeholder="Email" id="registerEmail" />
+    <input type="password" placeholder="Password" id="registerPassword" />
+    <button onclick="registerUser()" style="background:#00c853; color:#fff; border:none; padding:12px 25px; border-radius:25px; font-weight:bold; font-size:16px; margin-top:10px;">Daftar</button>
+    <p style="margin-top:25px; font-size:14px;">Sudah punya akun? <span style="color:#00c853; cursor:pointer; font-weight:bold;" onclick="showLogin()">Masuk</span></p>
   </div>
-  
-<!-- Navigation buttons (PC/iPad only) -->
-<nav class="desktop-only" style="display: flex; align-items: center; gap: 20px;">
-  <!-- Beranda -->
-  <a href="#" onclick="navigateTo('beranda')" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #333; font-weight: 500;">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#333" stroke-width="2" viewBox="0 0 24 24">
-      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.5z" />
-    </svg>
-    Beranda
-  </a>
-  
-  <!-- Explore -->
-  <a href="#" onclick="navigateTo('explore')" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #333; font-weight: 500;">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#333" stroke-width="2" viewBox="0 0 24 24">
-      <path d="M12 2a10 10 0 1010 10A10 10 0 0012 2z" />
-      <path d="M16 8l-4 8-4-4 8-4z" />
-    </svg>
-    Explore
-  </a>
-</nav>
-  
-  <!-- Action icons -->
-  <div style="display: flex; align-items: center; gap: 16px;">
-    <!-- Notifikasi -->
-    <a onclick="navigateTo('notifikasi')" style="cursor:pointer;" title="Notifikasi">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#333" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M15 17h5l-1.4-1.4c-.4-.4-.6-.8-.6-1.6V10a6 6 0 10-12 0v4c0 .8-.2 1.2-.6 1.6L4 17h5m6 0v1a3 3 0 11-6 0v-1h6z" />
-      </svg>
-    </a>
-    
-    <!-- Pesan -->
-    <a onclick="navigateTo('pesan')" style="cursor:pointer;" title="Pesan">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#333" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M21 11.5a8.4 8.4 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.4 8.4 0 01-4.5-1.6l-4 1 1-4a8.4 8.4 0 01-1-4 8.5 8.5 0 0116.5-3.9A8.4 8.4 0 0121 11.5z" />
-      </svg>
-    </a>
-    <!-- Dropdown Profil -->
-    <div class="dropdown" style="position:relative;">
-      <!-- Avatar Bulat -->
-      <a onclick="toggleDropdown()" style="cursor:pointer;">
-        <img src="https://i.pravatar.cc/36" alt="Avatar" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:2px solid #ccc;">
-      </a>
-
-      <!-- Dropdown Menu -->
-      <div id="dropdown-menu" class="dropdown-content" style="position:absolute; right:0; top:50px; background:#fff; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); display:none; flex-direction:column; min-width:180px; z-index:99;">
-        <a onclick="navigateTo('lihat-profil')" style="padding:12px 16px; display:flex; align-items:center; gap:10px; cursor:pointer;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="black" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 1112 21a9 9 0 01-6.879-3.196z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-          </svg>
-          Lihat Profil
-        </a>
-
-        <a onclick="navigateTo('pengaturan')" style="padding:12px 16px; display:flex; align-items:center; gap:10px; cursor:pointer;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="black" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3M12 1v2m6.364 2.636l-1.414 1.414M21 12h-2M4.636 4.636L3.222 6.05M3 12H1m4.636 5.364l1.414 1.414M12 21v2m5.364-2.636l1.414-1.414M4.636 17.364L6.05 16.95"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
-          Pengaturan
-        </a>
-
-        <a onclick="navigateTo('login')" style="padding:12px 16px; display:flex; align-items:center; gap:10px; cursor:pointer; color:#d00;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h6a2 2 0 002-2V5a2 2 0 00-2-2H3"/>
-          </svg>
-          Logout
-        </a>
-  </div>
-</header>
-
-<!-- Navigasi Bawah -->
-<div id="nav-bottom" class="mobile-only" style="position:fixed; bottom:0; left:0; width:100%; background:white; border-top:1px solid #ccc; display:flex; justify-content:space-around; align-items:center; padding:10px 0; z-index:99;">
-  <a onclick="navigateTo('beranda')" id="btn-beranda" class="active" style="text-align:center; flex:1;">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" width="24" height="24" viewBox="0 0 24 24" style="margin:auto;">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h5m4 0h5a1 1 0 001-1V10" />
-    </svg>
-    <div style="font-size:12px;">Beranda</div>
-  </a>
-  
-  <a onclick="navigateTo('explore')" id="btn-explore" style="text-align:center; flex:1;">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" width="24" height="24" viewBox="0 0 24 24" style="margin:auto;">
-      <circle cx="11" cy="11" r="8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    </svg>
-    <div style="font-size:12px;">Explore</div>
-  </a>
 </div>
 
-<!-- Explore -->
-<section id="explore" style="display:none; padding:24px; max-width:800px; margin:auto;">
-  
-  <!-- Search Bar -->
-  <div style="display:flex; align-items:center; gap:10px; background:#f0f0f0; padding:10px 16px; border-radius:30px; margin-bottom:20px; position:relative;">
-    
-    <!-- Tombol Kembali (hanya tampil di PC saat pencarian aktif) -->
-    <button id="backButton" onclick="clearSearch()" style="display:none; position:absolute; left:-48px; background:none; border:none; font-size:20px; cursor:pointer;">
-      ←
-    </button>
-    
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-    
-    <input type="text" id="searchExplore" placeholder="Cari konten..." oninput="searchExploreContent()" style="flex:1; border:none; outline:none; background:transparent; font-size:16px;">
-  </div>
-  
-  <!-- HASIL PENCARIAN -->
-  <div id="searchResults" style="display:none; flex-direction: column; gap: 24px;">
-    <div>
-      <h2 style="margin-bottom: 12px;">Akun</h2>
-      <div id="userResults" style="display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px;"></div>
+<div id="sidebar" style="display:none;">
+    <div class="profile-section">
+        <div class="profile-avatar">
+          <svg style="width:40px; height:40px; fill:#fff;" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+          </svg>
+        </div>
+        <span class="profile-name" id="sidebarUsername"></span>
+        <button onclick="showPage('profil')" style="background:#a259ff; color:#fff; border:none; padding:8px 15px; border-radius:20px; font-weight:bold; font-size:14px; margin-top:10px;">Lihat Profil</button>
     </div>
-    <div>
-      <h2 style="margin-bottom: 12px;">Konten</h2>
-      <div id="postResults" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px;"></div>
+
+    <div class="nav-items" style="flex-grow:1;">
+        <div class="nav-item" id="sidebar-btn-beranda" onclick="showPage('beranda')">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span>Beranda</span>
+        </div>
+        <div class="nav-item" id="sidebar-btn-pesan" onclick="showPage('pesan')">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12l4-4h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/></svg>
+            <span>Pesan</span>
+        </div>
+        <div class="nav-item" id="sidebar-btn-notifikasi" onclick="showPage('notifikasi')">
+            <svg viewBox="0 0 24 24"><path d="M12 24a2.4 2.4 0 002.4-2.4h-4.8A2.4 2.4 0 0012 24zm6.3-6v-5.25c0-3.15-1.65-5.85-4.8-6.45v-.6a1.5 1.5 0 00-3 0v.6C7.35 6.9 5.7 9.6 5.7 12.75V18l-1.5 1.5v.75h18v-.75L18.3 18z" /></svg>
+            <span>Notifikasi</span>
+        </div>
     </div>
-  </div>
-  
-  <!-- TRENDING -->
-  <div id="trendingSection">
-    <h2 style="font-size:20px; margin-bottom:12px;">🔥 Trending Sekarang</h2>
-    <div id="exploreContent" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px;"></div>
-  </div>
-</section>
 
-<!-- Notifikasi -->
-<section id="notifikasi" style="display:none; padding: 24px; max-width: 800px; margin: auto;">
-  
-  <!-- Tombol Kembali -->
-  <button onclick="navigateTo('beranda')" style="background:none; border:none; color:black; display:flex; align-items:center; gap:6px; font-size:16px; margin-bottom:20px; cursor:pointer;">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" width="20" height="20" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-    </svg>
-    Kembali
-  </button>
-  
-  <!-- Judul Notifikasi -->
-  <h1 style="font-size: 24px; margin-bottom: 16px; display: flex; align-items: center;">
-    <svg width="24" height="24" fill="currentColor" style="margin-right: 8px;" viewBox="0 0 24 24">
-      <path d="M12 2C10.07 2 8.5 3.57 8.5 5.5V6.09C5.71 7.14 4 9.75 4 12.7V18L2 20V21H22V20L20 18V12.7C20 9.75 18.29 7.14 15.5 6.09V5.5C15.5 3.57 13.93 2 12 2ZM12 24C13.1 24 14 23.1 14 22H10C10 23.1 10.9 24 12 24Z" />
-    </svg>
-    Notifikasi
-  </h1>
-  
-  <!-- Isi Notifikasi -->
-  <div id="notifList">Memuat notifikasi...</div>
-</section>
-
-<!-- === Halaman Daftar Pesan (Instagram-style) + Chat Page === -->
-<section id="pesan" style="display:none; flex-direction:column; background:#fff; height:100vh; color:#000;">
-
-  <!-- Header DM -->
-  <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid #ddd;">
-    <button onclick="navigateTo('beranda')" style="background:none; border:none;">
-      <svg width="24" height="24" fill="black" viewBox="0 0 24 24">
-        <path d="M15 19l-7-7 7-7" />
-      </svg>
-    </button>
-    <h2 style="font-size:20px; font-weight:600;">Pesan</h2>
-    <button onclick="buatPesanBaru()" style="background:none; border:none;">
-      <svg width="24" height="24" fill="black" viewBox="0 0 24 24">
-        <path d="M12 5v14M5 12h14" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-  </div>
-
-  <!-- Search & Filter -->
-  <div style="display:flex; gap:8px; padding:12px; border-bottom:1px solid #eee;">
-    <input type="text" id="searchPesan" placeholder="Cari pesan..." oninput="filterPesan()" style="flex:1; padding:10px; border-radius:8px; border:1px solid #ccc;" />
-    <select id="filterKategori" onchange="filterPesan()" style="padding:10px; border-radius:8px; border:1px solid #ccc;">
-      <option value="">Semua</option>
-      <option value="pribadi">Pribadi</option>
-      <option value="sistem">Sistem</option>
-    </select>
-  </div>
-
-<div id="daftarPesan" style="flex:1; overflow-y:auto;">
-  <!-- Akan diisi lewat JavaScript -->
+    <button onclick="logout()" style="background:red; color:#fff; border:none; padding:12px 25px; border-radius:25px; font-weight:bold; font-size:16px; margin-top:20px;">Logout</button>
 </div>
 
-  <!-- === Message Page (Chat View) === -->
-  <section id="messagePage" style="display:none; flex-direction:column; position:fixed; inset:0; background:#fff; color:#000; z-index:99;">
+<div id="mainContent" style="flex-grow:1; display:flex; flex-direction:column; height:100vh; overflow:hidden;">
 
-    <!-- Header Chat -->
-    <div style="display:flex; align-items:center; padding:12px; border-bottom:1px solid #eee; background:#fafafa;">
-      <button onclick="closeMessagePage()" style="margin-right:12px; background:none; border:none;">
-        <svg width="24" height="24" fill="black" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
-      </button>
-      <img src="https://api.dicebear.com/7.x/personas/svg?seed=random" style="width:32px; height:32px; border-radius:50%; margin-right:8px;">
-      <div>
-        <strong id="chatUsername">Username</strong>
-        <div id="chatStatus" style="font-size:12px; color:gray;">Offline</div>
+    <div id="topBar" style="position:sticky; top:0; z-index:999; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); padding:12px; display:flex; justify-content:space-between; align-items:center;">
+      <div onclick="showPage('profil')" style="cursor:pointer; display:flex; align-items:center; gap:10px;">
+        <div style="width:40px; height:40px; border-radius:50%; background:#a259ff; display:flex; align-items:center; justify-content:center;">
+          <svg style="width:22px; height:22px; fill:#fff;" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+          </svg>
+        </div>
+        <span style="font-weight:bold;" id="loggedInUsername"></span>
       </div>
-    </div>
-
-    <!-- Chat Messages -->
-    <div id="chatMessages" style="flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
-      <!-- Chat items -->
-    </div>
-
-    <!-- Typing -->
-    <div id="typingIndicator" style="padding:4px 12px; font-size:13px; color:#666; display:none;">Sedang mengetik...</div>
-
-    <!-- Input Chat -->
-    <div style="display:flex; align-items:center; padding:10px; border-top:1px solid #eee;">
-      <input 
-        type="text" 
-        id="chatInput" 
-        placeholder="Ketik pesan..." 
-        oninput="toggleSendIcon()" 
-        onkeydown="checkEnter(event)" 
-        style="flex:1; padding:10px; border:none; outline:none; font-size:15px;"
-      >
-      <button 
-        id="sendBtn" 
-        onclick="sendMessage()" 
-        style="display:none; background:none; border:none; margin-left:8px;"
-      >
-        <svg width="24" height="24" fill="#007bff" viewBox="0 0 24 24">
-          <path d="M2 21l21-9L2 3v7l15 2-15 2z"/>
+      <div onclick="showPage('notifikasi')" style="cursor:pointer;">
+        <svg style="width:28px; height:28px; fill:red;" viewBox="0 0 24 24">
+          <path d="M12 24a2.4 2.4 0 002.4-2.4h-4.8A2.4 2.4 0 0012 24zm6.3-6v-5.25c0-3.15-1.65-5.85-4.8-6.45v-.6a1.5 1.5 0 00-3 0v.6C7.35 6.9 5.7 9.6 5.7 12.75V18l-1.5 1.5v.75h18v-.75L18.3 18z" />
         </svg>
-      </button>
-      <button onclick="openMediaOptions()" style="background:none; border:none;">
-        <svg width="24" height="24" fill="gray" viewBox="0 0 24 24">
-          <path d="M12 2a10 10 0 100 20 10 10 0 000-20zM10 14l-2-2 4-4 4 4-2 2-2-2-2 2z"/>
-        </svg>
-      </button>
+      </div>
     </div>
 
-  </section>
-  </section>
-
-<!-- Profil Diri -->
-<section id="lihat-profil" style="display:none; padding:24px; max-width:800px; margin:auto;">
-  <div style="display:flex; align-items:center; gap:24px;">
-    <img id="myAvatar" src="https://i.pravatar.cc/100" style="width:100px; height:100px; border-radius:50%;">
-    <div>
-      <h2 id="myUsername" style="margin:0;">@anon</h2>
-      <p id="myStats" style="color:#555; margin-top:4px;">0 posts • 0 followers • 0 following</p>
-      <button style="margin-top:8px; padding:6px 16px; border-radius:6px; border:1px solid #ccc;">Edit Profil</button>
+    <div id="searchBar" style="display:flex; align-items:center; gap:10px; padding:12px; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px);">
+      <div style="flex:1; display:flex; background:#fff; border-radius:25px; overflow:hidden; border:1px solid #444;">
+        <input type="text" placeholder="Cari sesuatu..." style="flex:1; padding:10px 15px; border:none; outline:none; background:#333 !important; color:#fff !important; border-radius:25px 0 0 25px !important; margin-bottom:0 !important;" id="searchInput"/>
+        <div style="padding:10px; cursor:pointer; background:#333; border-radius:0 25px 25px 0;" onclick="performSearch()">
+          <svg style="width:18px; height:18px; fill:#aaa;" viewBox="0 0 24 24">
+            <path d="M21 21l-4.35-4.35m2.1-5.4a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z"/>
+          </svg>
+        </div>
+      </div>
+      <button id="actionButton" onclick="showPage('tambah-grup')" style="background:#00c853; color:#fff; border:none; padding:10px 18px; border-radius:25px; font-weight:bold; white-space:nowrap;">+ Buat Grup</button>
     </div>
-  </div>
-  <div id="profilSayaGrid" style="margin-top:24px; display:grid; grid-template-columns:repeat(3,1fr); gap:8px;"></div>
-</section>
 
-<!-- Profil Orang Lain -->
-<section id="profil-user" style="display:none; padding:24px; max-width:800px; margin:auto;">
-  <div style="display:flex; align-items:center; gap:24px;">
-    <img id="otherAvatar" src="https://i.pravatar.cc/100" style="width:100px; height:100px; border-radius:50%;">
-    <div>
-      <h2 id="profilUsername" style="margin:0;">@username</h2>
-      <p id="profilStats" style="color:#555; margin-top:4px;">0 posts • 0 followers • 0 following</p>
-      <button id="btnFollow" onclick="toggleFollow()" style="margin-top:8px; padding:6px 16px; border-radius:6px; border:none; background:#111; color:white;">Follow</button>
+    <div id="page-beranda" class="page" style="padding:20px;">
+      <div style="font-weight:bold; font-size:22px; margin-bottom:15px;">Grup Saya</div>
+      <div id="myGroupsContainer" style="display:flex; flex-direction:column; gap:10px;">
+        </div>
+      </div>
+
+    <div id="page-pesan" class="page" style="padding:20px;">
+      <div style="font-weight:bold; font-size:22px; margin-bottom:15px;">Pesan</div>
+      <div style="background:#1c1c1c; margin-top:10px; border-radius:15px; padding:15px; cursor:pointer; display:flex; align-items:center; box-shadow: 0 2px 8px rgba(0,0,0,0.3);" onclick="showPage('chat-amelia')">
+        <div style="width:40px; height:40px; background:purple; border-radius:50%; margin-right:15px; display:flex; align-items:center; justify-content:center; font-weight:bold;">AP</div>
+        <span style="font-size:18px;">Obrolan Umum</span> </div>
     </div>
-  </div>
-  <div id="profilLainGrid" style="margin-top:24px; display:grid; grid-template-columns:repeat(3,1fr); gap:8px;"></div>
-</section>
 
-<!-- Pengaturan -->
-<section id="pengaturan" style="display:none; padding:24px; max-width:600px; margin:auto; font-family:sans-serif;">
+    <div id="page-profil" class="page" style="padding:30px; text-align:center;">
+      <div class="back-button" onclick="history.back()">
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+      </div>
+      <div style="font-size:26px; font-weight:bold; margin-top:20px;">Profil Saya</div>
+      <div style="width:120px; height:120px; background:#a259ff; border-radius:50%; margin:20px auto; border: 4px solid #00c853;"></div>
+      <div style="font-size:24px; font-weight:bold;" id="myProfileUsername"></div> <p style="font-size:16px; color:#aaa;">"Selamat datang di profil saya!"</p>
+      <p style="margin-top:15px; font-size:16px;">Fans: <strong id="myFansCount">0</strong> | Hatters: <strong id="myHattersCount">0</strong></p>
+      <button onclick="alert('Fitur edit profil belum diimplementasikan.')" style="margin-top:25px; padding:12px 25px; background:#00c853; color:#fff; border:none; border-radius:25px; font-weight:bold; font-size:16px;">Edit Profil</button>
 
-<!-- Tombol Kembali -->
-<button onclick="navigateTo('beranda')" style="background:none; border:none; color:black; display:flex; align-items:center; gap:6px; font-size:16px; margin-bottom:20px; cursor:pointer;">
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" width="20" height="20" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-  </svg>
-  Kembali
-</button>
+      <div style="margin-top:40px; font-weight:bold; font-size:20px; text-align:left;">Postingan Saya</div>
+      <div id="myPostsContainer" style="margin-top:15px; display:flex; flex-direction:column; gap:15px;">
+        </div>
+      <button onclick="logout()" style="margin-top:40px; padding:12px 25px; background:red; color:#fff; border:none; border-radius:25px; font-weight:bold; font-size:16px;">Logout</button>
+    </div>
 
-  <!-- Judul dan Ikon -->
-  <h2 style="font-size:24px; margin-bottom:20px; display:flex; align-items:center; gap:10px;">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" width="24" height="24" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-        d="M12 1v2m6.364 2.636l-1.414 1.414M21 12h-2M6.364 4.05L4.95 5.464M3 12H1m4.636 5.364l1.414 1.414M12 21v2m5.364-2.636l1.414-1.414M4.05 17.636L5.464 16.22" />
-      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" />
+    <div id="page-group-detail" class="page flex-page" style="padding:0; font-family:sans-serif;">
+
+      <div class="back-button" onclick="history.back()">
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+      </div>
+
+      <div id="groupBannerContainer" style="position:relative; background:#00c853; height:180px; border-bottom-left-radius:30px; border-bottom-right-radius:30px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+        <img id="groupBannerImage" src="" alt="Group Banner" style="width:100%; height:100%; object-fit:cover; display:none;">
+        <div id="uploadBannerPrompt" style="color:#fff; font-weight:bold; text-align:center;">
+            <svg style="width:40px; height:40px; fill:#fff; margin-bottom:10px;" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg><br>Upload Banner
+        </div>
+        <input type="file" id="bannerUploadInput" accept="image/*" style="position:absolute; inset:0; opacity:0; cursor:pointer;" onchange="uploadGroupBanner(event)">
+      </div>
+
+      <div style="padding:20px; flex:1; overflow-y:auto;">
+        <h2 id="groupNameDisplay" style="text-align:center; margin-top:-30px; font-weight:bold; font-size:28px; background:#000; padding:10px 20px; border-radius:15px; display:inline-block; position:relative; left:50%; transform:translateX(-50%); box-shadow: 0 5px 15px rgba(0,0,0,0.5);"></h2>
+        <p id="groupDescriptionDisplay" style="text-align:center; font-size:15px; color:#aaa; margin-top:10px;"></p>
+        <p id="groupAdminBadge" style="text-align:center; font-size:14px; color:#00c853; font-weight:bold; display:none;">Admin</p>
+
+        <div id="groupAdminActions" style="display:none; margin:25px 0; text-align:center;">
+          <button onclick="alert('Fitur pengaturan grup belum diimplementasikan.')" style="background:#a259ff; color:#fff; border:none; padding:10px 20px; border-radius:25px; margin-right:15px; font-weight:bold;">Pengaturan Grup</button>
+          <button onclick="alert('Fitur promosikan anggota belum diimplementasikan.')" style="background:#a259ff; color:#fff; border:none; padding:10px 20px; border-radius:25px; font-weight:bold;">Promosikan Anggota</button>
+        </div>
+
+        <div onclick="showPage('buat-post')" style="margin:25px 0; background:#1c1c1c; border-radius:20px; padding:15px; text-align:center; cursor:pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+          <div style="background:#333; border-radius:15px; padding:12px; font-weight:bold; margin-bottom:10px; color:#aaa;">Buat post baru...</div>
+          <div style="display:flex; justify-content:space-around;">
+            <div><svg style="width:28px; height:28px; fill:#00c853;" viewBox="0 0 24 24"><path d="M17 10.5V6c0-1.1-.9-2-2-2H5C3.9 4 3 4.9 3 6v12c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-4.5l4 4v-11l-4 4z"/></svg></div>
+            <div><svg style="width:28px; height:28px; fill:#00c853;" viewBox="0 0 24 24"><path d="M12 5c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm-2 11l-3-3 1.41-1.41L10 13.17l5.59-5.59L17 9l-7 7z"/></svg></div>
+            <div><svg style="width:28px; height:28px; fill:#00c853;" viewBox="0 0 24 24"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 6.5 12 6.5 14.5 7.6 14.5 9 13.4 11.5 12 11.5z"/></svg></div>
+          </div>
+        </div>
+
+        <div id="groupPostsContainer">
+          </div>
+      </div>
+    </div>
+
+    <div id="page-chat-amelia" class="page flex-page" style="background:#000; color:#fff;">
+
+      <div style="background:#00c853; padding:15px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom-left-radius:20px; border-bottom-right-radius:20px; box-shadow: 0 4px 10px rgba(0,200,83,0.3); flex-shrink:0;">
+        <div style="display:flex; align-items:center; gap:15px;">
+          <div onclick="history.back()" style="width:35px; height:35px; background:#00a045; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+            <svg style="width:20px; height:20px; fill:#fff;" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+          </div>
+          <div style="width:40px; height:40px; background:purple; border-radius:50%;"></div>
+          <div style="font-weight:bold; font-size:18px;">Obrolan Umum</div> </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <svg style="width:28px; height:28px; fill:#fff;" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        </div>
+      </div>
+
+      <div id="chatContent" style="flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:12px;">
+        </div>
+
+      <div style="background:#1c1c1c; padding:10px 15px; display:flex; align-items:center; border-top-left-radius:20px; border-top-right-radius:20px; box-shadow: 0 -4px 10px rgba(0,0,0,0.4); flex-shrink:0;">
+        <div style="display:flex; gap:10px; margin-right:10px;">
+          <div style="width:36px; height:36px; background:#00c853; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+            <svg style="width:20px; height:20px; fill:#fff;" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          </div>
+          <div style="width:36px; height:36px; background:#00c853; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+            <svg style="width:20px; height:20px; fill:#fff;" viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.2-3c0 3.53-2.64 6.43-6.2 6.94V21h-2v-3.06c-3.56-.51-6.2-3.42-6.2-6.94H3c0 4.19 3.31 7.67 7.5 8.32V21h3v-2.68c4.19-.65 7.5-4.13 7.5-8.32h-2z"/></svg>
+          </div>
+        </div>
+        <input type="text" placeholder="Ketik sesuatu" style="flex:1; padding:10px 15px; border:none; outline:none; font-weight:bold; font-size:16px; background:#333 !important; color:#fff !important; border-radius:20px !important; margin-bottom:0 !important;" id="chatInput"/>
+        <div onclick="sendMessage()" style="width:36px; height:36px; background:#00c853; border-radius:50%; margin-left:10px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+            <svg style="width:20px; height:20px; fill:#fff;" viewBox="0 0 24 24">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-tambah-grup" class="page flex-page" style="background:#000; color:#fff;">
+
+        <div class="back-button" onclick="history.back()">
+          <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+        </div>
+
+        <div style="font-size:22px; font-weight:bold; margin:0 20px 20px;">Buat Grup Baru</div>
+
+        <div style="position:relative; height:180px; background:#1c1c1c; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 20px; border-radius:15px; overflow:hidden;">
+            <img id="newGroupBannerPreview" src="" alt="Banner Preview" style="width:100%; height:100%; object-fit:cover; display:none;">
+            <div id="newGroupUploadPrompt" style="text-align:center; color:#aaa;">
+                <div style="font-size:16px;">Tambah Banner Grup</div>
+                <div style="margin-top:10px; width:50px; height:50px; border-radius:50%; background:#00c853; display:flex; align-items:center; justify-content:center;">
+                    <svg style="width:24px; height:24px; fill:#000;" viewBox="0 0 24 24">
+                        <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+            </div>
+            <input type="file" id="newGroupBannerInput" accept="image/*" style="position:absolute; inset:0; opacity:0; cursor:pointer;" onchange="previewNewGroupBanner(event)">
+        </div>
+
+        <div style="padding:20px; flex:1; display:flex; flex-direction:column; gap:16px; overflow-y:auto;">
+
+            <div>
+                <label style="font-size:14px; color:#aaa;">Nama Grup</label>
+                <input type="text" placeholder="Contoh: Metal Punk Indonesia" id="newGroupName" />
+            </div>
+
+            <div>
+                <label style="font-size:14px; color:#aaa;">Deskripsi</label>
+                <textarea placeholder="Tulis deskripsi grup..." id="newGroupDescription"></textarea>
+            </div>
+
+            <button onclick="createNewGroup()" style="margin-top:auto; padding:15px; background:#00c853; color:#000; border:none; border-radius:30px; font-weight:bold; font-size:18px; cursor:pointer;">
+                + Buat Grup
+            </button>
+
+        </div>
+    </div>
+
+    <div id="page-buat-post" class="page flex-page" style="background:#000; color:#fff;">
+        <div class="back-button" onclick="history.back()">
+          <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+        </div>
+        <div style="font-size:22px; font-weight:bold; margin:0 20px 20px;">Buat Postingan Baru</div>
+
+        <div style="padding:0 20px; flex:1; overflow-y:auto;">
+            <div>
+                <label style="font-size:14px; color:#aaa;">Judul Post</label>
+                <input type="text" placeholder="Judul postingan Anda" id="postTitleInput" />
+            </div>
+
+            <div>
+                <label style="font-size:14px; color:#aaa;">Isi Post</label>
+                <textarea placeholder="Tulis isi postingan Anda di sini..." id="postContentInput"></textarea>
+            </div>
+
+            <div style="margin-top:15px; margin-bottom:20px; display:flex; gap:15px; justify-content:center;">
+                <div style="width:50px; height:50px; background:#1c1c1c; border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="document.getElementById('postImageInput').click();">
+                    <svg style="width:28px; height:28px; fill:#00c853;" viewBox="0 0 24 24"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.5 13.5l2.5 3.01L14.5 11l4.5 6H5l3.5-4.5z"/></svg>
+                    <input type="file" id="postImageInput" accept="image/*,video/*" style="display:none;" onchange="previewPostMedia(event)">
+                </div>
+                <div style="width:50px; height:50px; background:#1c1c1c; border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                    <svg style="width:28px; height:28px; fill:#00c853;" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </div>
+            </div>
+            <img id="postImagePreview" src="" style="max-width:100%; border-radius:10px; margin-top:10px; display:none;">
+            <video id="postVideoPreview" src="" controls style="max-width:100%; border-radius:10px; margin-top:10px; display:none;"></video>
+
+            <button onclick="createNewPost()" style="margin-top:20px; padding:15px; background:#00c853; color:#000; border:none; border-radius:30px; font-weight:bold; font-size:18px; cursor:pointer;">
+                Unggah Postingan
+            </button>
+        </div>
+    </div>
+
+    <div id="page-tambah-pesan" class="page" style="padding:20px;">
+      <div class="back-button" onclick="history.back()">
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+      </div>
+      <div style="font-size:22px; font-weight:bold; margin-bottom:20px;">Kirim Pesan Baru</div>
+      <input type="text" placeholder="Kepada..." style="width:100%; margin-bottom:15px;" />
+      <textarea placeholder="Tulis pesan..." style="width:100%; height:120px;"></textarea>
+      <button onclick="alert('Fitur kirim pesan ke individu belum diimplementasikan.')" style="margin-top:20px; padding:12px 25px; background:#00c853; color:#fff; border:none; border-radius:25px; font-weight:bold; font-size:16px;">Kirim</button>
+    </div>
+
+    <div id="page-notifikasi" class="page" style="padding:20px;">
+      <div class="back-button" onclick="history.back()">
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+      </div>
+      <div style="font-size:22px; font-weight:bold; margin-bottom:20px;">Notifikasi</div>
+      <div style="background:#1f1f1f; padding:15px 20px; border-radius:15px; margin-bottom:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">🔥 Amelia mengirim pesan baru</div>
+      <div style="background:#1f1f1f; padding:15px 20px; border-radius:15px; margin-bottom:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">🎉 Kamu ditambahkan ke Grup Funhub</div>
+      <div style="background:#1f1f1f; padding:15px 20px; border-radius:15px; margin-bottom:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">👍 Postingan Anda disukai oleh <strong>Budi</strong></div>
+    </div>
+
+    <div id="page-hasil-pencarian" class="page" style="padding:20px;">
+      <div class="back-button" onclick="history.back()">
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+      </div>
+      <div style="font-size:22px; font-weight:bold; margin-bottom:20px;">Hasil Pencarian untuk "<span id="searchQueryDisplay"></span>"</div>
+      <h3 style="margin-bottom:10px; color:#00c853;">Pengguna</h3>
+      <div id="userSearchResults" style="display:flex; flex-direction:column; gap:10px;">
+        </div>
+      <h3 style="margin-top:25px; margin-bottom:10px; color:#00c853;">Postingan</h3>
+      <div id="postSearchResults" style="display:flex; flex-direction:column; gap:10px;">
+        </div>
+    </div>
+
+    <div id="page-profil-user-lain" class="page" style="padding:30px; text-align:center;">
+      <div class="back-button" onclick="history.back()">
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+      </div>
+      <div style="font-size:26px; font-weight:bold; margin-top:20px;" id="otherUserName"></div>
+      <div style="width:120px; height:120px; background:#a259ff; border-radius:50%; margin:20px auto; border: 4px solid #00c853;"></div>
+      <p style="font-size:16px; color:#aaa;">"Hai, salam kenal!"</p>
+      <p style="margin-top:15px; font-size:16px;">Fans: <strong id="otherUserFansCount">0</strong> | Hatters: <strong id="otherUserHattersCount">0</strong></p>
+      <div style="margin-top:25px;">
+        <button id="fanButton" onclick="toggleFan()" style="padding:12px 25px; background:#555; color:#fff; border:none; border-radius:25px; margin-right:15px; font-weight:bold; font-size:16px;">Fans</button>
+        <button id="hatterButton" onclick="toggleHatter()" style="padding:12px 25px; background:#555; color:#fff; border:none; border-radius:25px; font-weight:bold; font-size:16px;">Hatters</button>
+      </div>
+      <div style="margin-top:40px; font-weight:bold; font-size:20px; text-align:left;">Postingan</div>
+      <div id="otherUserPostsContainer" style="margin-top:15px; display:flex; flex-direction:column; gap:15px;">
+        </div>
+    </div>
+
+    <div id="page-setting-grup" class="page flex-page" style="background:#000; color:#fff;">
+      <div class="back-button" onclick="history.back()">
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+      </div>
+      <div style="font-size:22px; font-weight:bold; margin:0 20px 20px;">Pengaturan Grup</div>
+
+      <div style="padding:0 20px; flex:1; overflow-y:auto;">
+        <div style="margin-bottom:20px;">
+          <label style="font-size:14px; color:#aaa;">Nama Grup</label>
+          <input type="text" id="groupSettingName" value="" /> </div>
+        <div style="margin-bottom:20px;">
+          <label style="font-size:14px; color:#aaa;">Deskripsi Grup</label>
+          <textarea id="groupSettingDescription"></textarea> </div>
+        <button onclick="alert('Fitur simpan pengaturan grup belum diimplementasikan.')" style="width:100%; padding:15px; background:#00c853; color:#000; border:none; border-radius:30px; font-weight:bold; font-size:18px;">Simpan Perubahan</button>
+      </div>
+    </div>
+
+    <div id="page-promosikan-anggota" class="page flex-page" style="background:#000; color:#fff;">
+      <div class="back-button" onclick="history.back()">
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+      </div>
+      <div style="font-size:22px; font-weight:bold; margin:0 20px 20px;">Promosikan Anggota</div>
+
+      <div style="padding:0 20px; flex:1; overflow-y:auto;">
+        <input type="text" placeholder="Cari anggota..." style="margin-bottom:20px;" />
+        <div style="background:#1c1c1c; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span>Budi Santoso</span>
+          <select style="background:#00c853; color:#fff; border:none; padding:8px 12px; border-radius:10px;">
+            <option value="member">Anggota</option>
+            <option value="moderator">Moderator</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div style="background:#1c1c1c; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span>Amelia Putri</span>
+          <select style="background:#00c853; color:#fff; border:none; padding:8px 12px; border-radius:10px;">
+            <option value="member">Anggota</option>
+            <option value="moderator">Moderator</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <button onclick="alert('Fitur simpan peran belum diimplementasikan!')" style="width:100%; padding:15px; background:#00c853; color:#000; border:none; border-radius:30px; font-weight:bold; font-size:18px; margin-top:20px;">Simpan Peran</button>
+      </div>
+    </div>
+
+    <div id="commentModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+        <div id="commentModalContent" style="background:#1c1c1c; padding:25px; border-radius:20px; width:90%; max-width:500px; max-height:80vh; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.6);">
+            <h3 style="margin-top:0; color:#00c853;">Komentar</h3>
+            <div id="commentPostPreview" style="background: #333; padding: 15px; border-radius: 10px; margin-bottom: 15px; overflow-y: auto; max-height: 150px;">
+                </div>
+            <div id="commentsList" style="flex-grow: 1; overflow-y: auto; margin-bottom: 15px; padding-right: 10px;">
+                </div>
+            <div id="commentInputContainer" style="display: flex; gap: 10px; margin-top: auto;">
+                <input type="text" id="newCommentInput" placeholder="Tambah komentar..." style="flex-grow: 1; margin-bottom: 0; border-radius: 20px;" />
+                <button onclick="addComment()" style="background:#00c853; color:#000; border:none; padding:10px 20px; border-radius:20px; font-weight:bold;">Kirim</button>
+            </div>
+            <button onclick="closeCommentModal()" style="background:#f44336; color:#fff; border:none; padding:10px 20px; border-radius:20px; margin-top:15px;">Tutup</button>
+        </div>
+    </div>
+
+    <div id="postSettingsDropdown" class="post-settings-dropdown" style="display:none; position:fixed; background:#2a2a2a; border-radius:10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); min-width:150px; z-index:1000; padding:8px 0;">
+        <div onclick="editPost()">Edit Postingan</div>
+        <div onclick="deletePost()">Hapus Postingan</div>
+    </div>
+
+</div>
+
+<div id="bottomNavBar" style="position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(18,18,18,0.9); backdrop-filter:blur(8px); padding:15px 45px; border-radius:40px; display:flex; gap:60px; z-index:1000;">
+  <div onclick="showPage('beranda')" id="btn-beranda" style="cursor:pointer; display:flex; flex-direction:column; align-items:center;">
+    <svg style="width:36px; height:36px; fill:#00c853;" viewBox="0 0 24 24">
+      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
     </svg>
-    Pengaturan
-  </h2>
-  
-  <div style="background:#fff; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); padding:16px; display:flex; flex-direction:column; gap:16px;">
-    
-    <div onclick="alert('Belum tersedia')" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 1012 21v-1M16 9l-4 4m0 0l-4-4m4 4V3" />
-      </svg>
-      <span>Ubah Password</span>
-    </div>
-    
-    <div onclick="alert('Belum tersedia')" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-      </svg>
-      <span>Privasi & Keamanan</span>
-    </div>
-    
-    <div onclick="alert('Belum tersedia')" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 9.75a3 3 0 014.5 0M15 15a3 3 0 01-6 0" />
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span>Notifikasi</span>
-    </div>
-    
-    <div onclick="alert('Berhasil logout')" style="display:flex; align-items:center; gap:12px; color:#d00; cursor:pointer;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" />
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h6a2 2 0 002-2V5a2 2 0 00-2-2H3" />
-      </svg>
-      <span>Logout</span>
-    </div>
-    
+    <span style="font-size:12px; margin-top:5px; color:#00c853;">Beranda</span>
   </div>
-</section>
-
-<!-- LOGIN -->
-<section id="login" style="display:none; padding: 24px; max-width: 400px; margin: auto;">
-  <!-- Tombol Kembali -->
-  <button onclick="navigateTo('beranda')" style="background: none; border: none; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: #555; cursor: pointer;">
-    <svg width="20" height="20" fill="currentColor"><path d="M15 4l-6 6 6 6"/></svg> Kembali
-  </button>
-
-  <!-- Judul -->
-  <h1 style="font-size: 28px; margin-bottom: 24px; display:flex; align-items:center; gap:10px;">
-    <svg width="28" height="28" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4S8 5.79 8 8s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-    Masuk ke 9AnonGag
-  </h1>
-
-  <!-- Form -->
-  <input type="text" placeholder="Username" style="width:100%; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ccc;">
-  <input type="password" placeholder="Password" style="width:100%; padding:12px; border-radius:8px; margin-bottom:20px; border:1px solid #ccc;">
-  <button style="width:100%; padding:12px; background:#111; color:white; border:none; border-radius:8px;">🔐 Masuk</button>
-
-  <!-- Ke Daftar -->
-  <p style="margin-top: 20px; text-align: center; font-size: 14px;">
-    Belum punya akun? <a href="#" onclick="navigateTo('daftar')" style="color:#2196f3;">Daftar</a>
-  </p>
-</section>
-
-<!-- DAFTAR -->
-<section id="daftar" style="display:none; padding: 24px; max-width: 400px; margin: auto;">
-  <!-- Tombol Kembali -->
-  <button onclick="navigateTo('beranda')" style="background: none; border: none; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: #555; cursor: pointer;">
-    <svg width="20" height="20" fill="currentColor"><path d="M15 4l-6 6 6 6"/></svg> Kembali
-  </button>
-
-  <!-- Judul -->
-  <h1 style="font-size: 28px; margin-bottom: 24px; display:flex; align-items:center; gap:10px;">
-    <svg width="28" height="28" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4S8 5.79 8 8s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-    Daftar Akun Baru
-  </h1>
-
-  <!-- Form -->
-  <input type="text" placeholder="Username" style="width:100%; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ccc;">
-  <input type="email" placeholder="Email" style="width:100%; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ccc;">
-  <input type="password" placeholder="Password" style="width:100%; padding:12px; border-radius:8px; margin-bottom:20px; border:1px solid #ccc;">
-  <button style="width:100%; padding:12px; background:#111; color:white; border:none; border-radius:8px;">📝 Daftar</button>
-
-  <!-- Ke Login -->
-  <p style="margin-top: 20px; text-align: center; font-size: 14px;">
-    Sudah punya akun? <a href="#" onclick="navigateTo('login')" style="color:#2196f3;">Masuk</a>
-  </p>
-</section>
-
-<!-- Popup Login -->
-<div id="loginPopup" style="
-  display: none;
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 9999;
-  justify-content: center;
-  align-items: center;
-">
-  <div style="background: white; padding: 20px 24px; border-radius: 12px; max-width: 300px; text-align: center; color: black;">
-    <h3 style="margin-bottom: 12px;">Silakan login dulu</h3>
-    <button onclick="redirectToLogin()" style="background: #007bff; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer;">
-      Masuk Sekarang
-    </button>
+  <div onclick="showPage('pesan')" id="btn-pesan" style="cursor:pointer; display:flex; flex-direction:column; align-items:center;">
+    <svg style="width:36px; height:36px; fill:#fff;" viewBox="0 0 24 24">
+      <path d="M20 4H4a2 2 0 0 0-2 2v12l4-4h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
+    </svg>
+    <span style="font-size:12px; margin-top:5px; color:#fff;">Pesan</span>
   </div>
 </div>
 
-
-
-<!-- Beranda dengan Banner Slider Iklan -->
-<section id="beranda" class="active" style="padding: 16px; max-width: 900px; margin: auto;">
-  <div style="position: relative; overflow: hidden; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
-    <div id="slider" style="display: flex; transition: transform 0.8s ease;">
-      <!-- Slide 1 -->
-      <div style="min-width: 100%; position: relative;">
-        <img src="https://source.unsplash.com/1200x400/?promo,fun" style="width: 100%; height: auto; object-fit: cover;">
-        <div style="position:absolute; top:20%; left:5%; color:white; text-shadow:0 2px 4px rgba(0,0,0,0.6);">
-          <h2 style="font-size: 28px; margin-bottom: 8px;">🎉 Promo Meme Mingguan</h2>
-          <p style="margin-bottom: 12px;">Upload meme terbaikmu & menangkan hadiah!</p>
-          <button style="padding:10px 20px; background:#ff5722; border:none; color:white; border-radius:6px; cursor:pointer;">Ikuti Sekarang</button>
-        </div>
-      </div>
-
-      <!-- Slide 2 -->
-      <div style="min-width: 100%; position: relative;">
-        <img src="https://source.unsplash.com/1200x400/?advertising,community" style="width: 100%; height: auto; object-fit: cover;">
-        <div style="position:absolute; top:20%; left:5%; color:white; text-shadow:0 2px 4px rgba(0,0,0,0.6);">
-          <h2 style="font-size: 28px; margin-bottom: 8px;">📢 Pasang Iklan Kamu</h2>
-          <p style="margin-bottom: 12px;">Promosikan produk atau komunitasmu di 9AnonGag.</p>
-          <button style="padding:10px 20px; background:#4caf50; border:none; color:white; border-radius:6px; cursor:pointer;">Hubungi Kami</button>
-        </div>
-      </div>
-
-      <!-- Slide 3 -->
-      <div style="min-width: 100%; position: relative;">
-        <img src="https://source.unsplash.com/1200x400/?event,contest" style="width: 100%; height: auto; object-fit: cover;">
-        <div style="position:absolute; top:20%; left:5%; color:white; text-shadow:0 2px 4px rgba(0,0,0,0.6);">
-          <h2 style="font-size: 28px; margin-bottom: 8px;">🏆 Kontes Mingguan</h2>
-          <p style="margin-bottom: 12px;">Ayo ikut voting konten paling lucu minggu ini!</p>
-          <button style="padding:10px 20px; background:#2196f3; border:none; color:white; border-radius:6px; cursor:pointer;">Lihat Kontes</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Dot navigasi -->
-    <div id="sliderDots" style="position:absolute; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:6px;">
-      <div class="dot active-dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-    </div>
-  </div>
-
-  <!-- Bar Postingan -->
-  <div onclick="openPostModal()" style="background: white; padding: 12px 16px; border-radius: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer; margin-bottom: 24px;">
-    <img src="https://i.pravatar.cc/40" style="width:40px; height:40px; border-radius:50%;">
-    <div style="flex: 1; background: #f0f2f5; border-radius: 20px; padding: 10px 16px; color: #666;">
-      Apa yang kamu pikirkan?
-    </div>
-  </div>
-
-
-<!-- Modal Buat Postingan -->
-<div id="postModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
-  <div style="background:white; border-radius:12px; padding:20px; max-width:500px; width:90%; box-shadow: 0 8px 24px rgba(0,0,0,0.2); position: relative; max-height:90vh; overflow-y:auto;">
-    
-    <button type="button" onclick="cancelPost()" style="display: flex; align-items: center; gap: 6px; background: none; border: none; font-size: 16px; cursor: pointer; color: #333;">
-      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
-      Kembali
-    </button>
-
-    <h3 style="text-align:center; margin-bottom: 16px;">📝 Buat Postingan</h3>
-
-    <!-- Judul -->
-    <div style="display:flex; align-items:center; margin-bottom:10px;">
-      <input id="title" placeholder="Judul postingan..." oninput="checkPreviewDisplay()" style="flex:1; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" />
-    </div>
-
-    <!-- Preview -->
-    <div id="preview" style="margin-bottom: 16px; display: none;">
-      <p style="font-weight: bold; margin-bottom: 8px;">📸 Preview:</p>
-      <div id="previewContainer" style="border: 1px solid #ccc; border-radius: 8px; overflow: hidden; max-height: 300px;"></div>
-    </div>
-
-    <!-- Deskripsi -->
-    <textarea id="desc" placeholder="Deskripsi, bisa #hashtag atau @mention..." rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; resize: vertical; margin-bottom:10px;"></textarea>
-
-    <!-- Input Upload File -->
-    <label for="uploadFile" style="display:flex; align-items:center; gap:10px; margin-bottom:12px; cursor:pointer;">
-      <svg width="20" height="20" fill="gray" viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zm7-18L5.33 9h3.34v4h6.66V9h3.34L12 2z"/></svg>
-      <span>Upload Gambar / Video</span>
-    </label>
-    <input type="file" id="uploadFile" accept="image/*,video/*" style="display:none;" onchange="handleFileUpload()" />
-
-    <!-- Input Link Media -->
-    <div style="display:flex; align-items:center; gap:10px; border:1px solid #ccc; border-radius:8px; padding:10px; margin-bottom:16px;">
-      <svg width="20" height="20" fill="gray" viewBox="0 0 24 24"><path d="M3.9,12c0,1.71,1.39,3.1,3.1,3.1H9v1.45H7c-2.5,0-4.55-2.05-4.55-4.55S4.5,7.45,7,7.45h2V8.9H7C5.29,8.9,3.9,10.29,3.9,12z M8,11.25h8v1.5H8V11.25z M17,7h-2v1.45h2c1.71,0,3.1,1.39,3.1,3.1s-1.39,3.1-3.1,3.1h-2V14.1h2c1.16,0,2.1-0.94,2.1-2.1S18.16,9.9,17,9.9z"/></svg>
-      <input type="text" id="media" placeholder="Link .jpg / .mp4 / YouTube..." oninput="handleLinkInput()" style="flex:1; border:none; outline:none; font-size:14px;" />
-    </div>
-
-    <!-- Tombol Posting -->
-    <button onclick="addPost()" style="padding: 12px 24px; background: #111; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">🚀 Posting</button>
-  </div>
-</div>
-
-<!-- Container Postingan -->
-<div id="postContainer" style="
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 16px;
-  padding: 16px;
-"></div>
-
-<!-- Popup Komentar -->
-<div id="commentPopup" style="
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #fff;
-  color: #000;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  max-height: 60%;
-  overflow-y: auto;
-  display: none;
-  flex-direction: column;
-  z-index: 9999;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-">
-  <!-- Header Komentar -->
-  <div style="
-    padding: 12px;
-    font-weight: bold;
-    border-bottom: 1px solid #ddd;
-    text-align: center;
-  ">
-    Komentar
-  </div>
-  
-  <!-- Daftar Komentar -->
-  <div id="commentList" style="flex: 1; padding: 12px;"></div>
-  
-  <!-- Input Komentar -->
-  <div style="display: flex; border-top: 1px solid #ddd;">
-    <input id="commentInput" type="text" placeholder="Tulis komentar..." style="
-      flex: 1;
-      padding: 10px;
-      border: none;
-      outline: none;
-      font-size: 14px;
-    " />
-    <button onclick="sendComment()" style="
-      padding: 10px 16px;
-      border: none;
-      background: #007bff;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    ">Kirim</button>
-  </div>
-</div>
-
-<script>
-function openMessagePage(username) {
-  document.getElementById("pesan").querySelector("#messagePage").style.display = "flex";
-  document.getElementById("chatUsername").innerText = username;
-  document.getElementById("chatStatus").innerText = "Online";
-  document.getElementById("chatMessages").innerHTML = ""; // reset isi chat
-}
-
-function closeMessagePage() {
-  document.getElementById("pesan").querySelector("#messagePage").style.display = "none";
-}
-
-function buatPesanBaru() {
-  alert("Fitur pesan baru belum tersedia.");
-}
-
-function toggleSendIcon() {
-  const input = document.getElementById("chatInput");
-  const sendBtn = document.getElementById("sendBtn");
-  sendBtn.style.display = input.value.trim() ? "block" : "none";
-}
-
-function checkEnter(event) {
-  if (event.key === "Enter") sendMessage();
-}
-
-function sendMessage() {
-  const input = document.getElementById("chatInput");
-  if (!input.value.trim()) return;
-  const pesan = input.value.trim();
-
-  const bubble = document.createElement("div");
-  bubble.textContent = pesan;
-  bubble.style.alignSelf = "flex-end";
-  bubble.style.background = "#007bff";
-  bubble.style.color = "#fff";
-  bubble.style.padding = "10px 14px";
-  bubble.style.borderRadius = "16px";
-  bubble.style.maxWidth = "80%";
-  bubble.style.fontSize = "14px";
-
-  document.getElementById("chatMessages").appendChild(bubble);
-  input.value = "";
-  toggleSendIcon();
-}
-</script>
-
-
-<script>
-function toggleLike(postId) {
-if (!currentUser) return showLoginPopup();
-// lanjutkan fungsi like
-}
-
-function toggleDislike(postId) {
-if (!currentUser) return showLoginPopup();
-// lanjutkan fungsi dislike
-}
-
-function openComments(postId) {
-if (!currentUser) return showLoginPopup();
-// tampilkan popup komentar
-}
-</script>
-
-<script>
-document.addEventListener("click", function(e) {
-const popup = document.getElementById("loginPopup");
-if (e.target === popup) {
-popup.style.display = "none";
-}
-});
-</script>
-
-<script>
-function showLoginPopup() {
-  document.getElementById("loginPopup").style.display = "flex";
-}
-
-function redirectToLogin() {
-  window.location.href = "#login"; // atau ganti dengan "/login.html" jika pakai halaman terpisah
-}
-</script>
-
-<script>
-  let currentUser = null;
-
-  onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-  });
-</script>
-
-
-<script>
-  async function searchExploreContent() {
-    const keyword = document.getElementById("searchExplore").value.trim().toLowerCase();
-    const searchResults = document.getElementById("searchResults");
-    const trending = document.getElementById("trendingSection");
-    const backBtn = document.getElementById("backButton");
-    
-    if (keyword.length === 0) {
-      searchResults.style.display = "none";
-      trending.style.display = "block";
-      backBtn.style.display = "none";
-      return;
-    }
-    
-    // Tampilkan hasil pencarian, sembunyikan trending
-    searchResults.style.display = "flex";
-    trending.style.display = "none";
-    
-    // Tampilkan tombol kembali hanya di desktop
-    if (window.innerWidth >= 768) {
-      backBtn.style.display = "block";
-    }
-    
-    // 🔍 Cari akun
-    const userSnap = await getDocs(query(collection(db, "users")));
-    const matchedUsers = userSnap.docs.map(d => d.data()).filter(user =>
-      (user.username || '').toLowerCase().includes(keyword)
-    );
-    
-    // 🔍 Cari post
-    const postSnap = await getDocs(query(collection(db, "posts")));
-    const matchedPosts = postSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      .filter(post =>
-        (post.title || '').toLowerCase().includes(keyword) ||
-        (post.desc || '').toLowerCase().includes(keyword)
-      );
-    
-    renderUserResults(matchedUsers);
-    renderPostResults(matchedPosts);
-  }
-  
-  function clearSearch() {
-    document.getElementById("searchExplore").value = "";
-    searchExploreContent(); // Akan otomatis sembunyikan searchResults
-  }
-</script>
-
-<script>
-function renderPostResults(posts) {
-const postResults = document.getElementById("postResults");
-postResults.innerHTML = "";
-
-posts.forEach(post => {
-const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(post.mediaURL);
-const isVideo = /\.(mp4|webm|ogg)$/i.test(post.mediaURL);
-const isYoutube = post.mediaURL.includes("youtube.com") || post.mediaURL.includes("youtu.be");
-
-let mediaHTML = "";
-if (isImage) {
-mediaHTML = `<img src="${post.mediaURL}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;" />`;
-} else if (isVideo) {
-mediaHTML = `<video src="${post.mediaURL}" muted autoplay loop playsinline style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;"></video>`;
-} else if (isYoutube) {
-const youtubeID = post.mediaURL.split("v=")[1]?.split("&")[0] || post.mediaURL.split("/").pop();
-mediaHTML = `<iframe src="https://www.youtube.com/embed/${youtubeID}" frameborder="0" allowfullscreen style="width: 100%; height: 200px; border-radius: 8px;"></iframe>`;
-}
-
-postResults.innerHTML += `
-<div style="position: relative;">
-  ${mediaHTML}
-  <div style="position: absolute; bottom: 6px; left: 6px; background: rgba(0,0,0,0.5); color: white; padding: 2px 6px; font-size: 12px; border-radius: 4px;">
-    ${post.title || 'Tanpa Judul'}
-  </div>
-</div>
-`;
-});
-}
-</script>
-
-<script>
-function renderUserResults(users) {
-  const userResults = document.getElementById("userResults");
-  userResults.innerHTML = "";
-
-  users.forEach(user => {
-    userResults.innerHTML += `
-      <div style="flex: 0 0 auto; width: 80px; text-align: center;">
-        <img src="${user.photoURL || 'https://i.pravatar.cc/100'}" 
-             style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #333;" />
-        <div style="font-size: 12px; color: #000; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-          ${user.username || 'Pengguna'}
-        </div>
-      </div>
-    `;
-  });
-}
-</script>
-    
-<script>
-let currentPostId = null;
-
-window.openComments = async function(postId) {
-currentPostId = postId;
-document.getElementById("commentPopup").style.display = "flex";
-
-const postRef = doc(db, "posts", postId);
-const postSnap = await getDoc(postRef);
-const data = postSnap.data();
-
-const list = document.getElementById("commentList");
-list.innerHTML = "";
-
-if (data.comments && data.comments.length) {
-data.comments.forEach(comment => {
-const div = document.createElement("div");
-div.textContent = comment;
-div.style.padding = "6px 0";
-list.appendChild(div);
-});
-} else {
-list.innerHTML = "<p style='color:gray;'>Belum ada komentar.</p>";
-}
-};
-
-window.sendComment = async function() {
-const input = document.getElementById("commentInput");
-const text = input.value.trim();
-if (!text || !currentPostId) return;
-
-const postRef = doc(db, "posts", currentPostId);
-const postSnap = await getDoc(postRef);
-const data = postSnap.data();
-const comments = data.comments || [];
-
-comments.push(text);
-
-await updateDoc(postRef, { comments });
-
-input.value = "";
-openComments(currentPostId); // refresh komentar
-};
-
-// Tutup popup kalau klik di luar area
-window.onclick = function(e) {
-const popup = document.getElementById("commentPopup");
-if (popup.style.display === "flex" && !popup.contains(e.target) && e.target.tagName !== "BUTTON") {
-popup.style.display = "none";
-}
-};
-</script>
-    
-    
-<script>
-async function likePost(id) {
-const refPost = doc(db, "posts", id);
-await updateDoc(refPost, { likes: increment(1) });
-}
-
-async function dislikePost(id) {
-const refPost = doc(db, "posts", id);
-await updateDoc(refPost, { dislikes: increment(1) });
-}
-
-function commentPost(id) {
-alert("Fitur komentar belum ditambahkan");
-}
-
-function sharePost(id, title) {
-const url = location.origin + "/?post=" + id;
-navigator.clipboard.writeText(url);
-alert("Link disalin: " + url);
-}
-</script>
-
-<script>
-const postContainer = document.getElementById("postContainer");
-const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-
-onSnapshot(q, (snapshot) => {
-  postContainer.innerHTML = "";
-  snapshot.forEach((doc) => {
-    const data = doc.data();
-    const id = doc.id;
-    
-    const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(data.mediaURL);
-    const isVideo = /\.(mp4|webm|ogg)$/i.test(data.mediaURL);
-    const isYoutube = data.mediaURL.includes("youtube.com") || data.mediaURL.includes("youtu.be");
-    
-    let mediaHTML = "";
-    if (isImage) {
-      mediaHTML = `<img src="${data.mediaURL}" class="post-media" />`;
-    } else if (isVideo) {
-      mediaHTML = `<video src="${data.mediaURL}" class="post-media" controls></video>`;
-    } else if (isYoutube) {
-      const youtubeID = data.mediaURL.split("v=")[1]?.split("&")[0] || data.mediaURL.split("/").pop();
-      mediaHTML = `<iframe src="https://www.youtube.com/embed/${youtubeID}" class="post-media" frameborder="0" allowfullscreen></iframe>`;
-    }
-    
-    postContainer.innerHTML += `
-      <div class="post-card">
-        ${mediaHTML}
-        <div class="post-content">
-          <strong>${data.title || "Tanpa Judul"}</strong>
-          <p style="font-size: 14px; color: #666;">${data.desc || ""}</p>
-        </div>
-        <div class="post-actions" style="display:flex; gap:8px; margin-top:8px;">
-          <!-- Like -->
-          <button onclick="toggleLike('${id}')" id="likeBtn-${id}" style="background:none; border:none; cursor:pointer;">
-            <svg id="likeIcon-${id}" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 24 24">
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 
-                       4 4 6.5 4c1.74 0 3.41 1.01 
-                       4.5 2.09C12.09 5.01 13.76 4 
-                       15.5 4 18 4 20 6 20 
-                       8.5c0 3.78-3.4 6.86-8.55 
-                       11.54L12 21.35z" />
-            </svg>
-          </button>
-
-          <!-- Dislike -->
-          <button onclick="toggleDislike('${id}')" id="dislikeBtn-${id}" style="background:none; border:none; cursor:pointer;">
-            <svg id="dislikeIcon-${id}" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 24 24">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 2.54 1.21 
-                       4.79 3.17 6.24L12 22l3.83-6.76C17.79 
-                       13.79 19 11.54 19 9c0-3.87-3.13-7-7-7zM12 
-                       12.5l-1.41-1.41L12 9.67l1.41 1.42L12 
-                       12.5z" />
-            </svg>
-          </button>
-
-          <!-- Komentar -->
-          <button onclick="openComments('${id}')" style="background: none; border: none; cursor: pointer;">
-            <svg width="20" height="20" fill="gray" viewBox="0 0 24 24">
-              <path d="M21 6.5l-1.41-1.41L17 7.67V3h-2v4.67L10.41 5.09 9 6.5 15 12l6-5.5zM6 8h2v12H6z" />
-            </svg>
-          </button>
-
-          <!-- Share -->
-          <button onclick="sharePost('${id}', '${data.title || ""}')">
-            🔗
-          </button>
-        </div>
-      </div>
-    `;
-  });
-});
-</script>
-
-<script>
-function tampilkanGambarTanpaCache(namaFile, elemenID) {
-const fileRef = ref(storage, namaFile);
-getDownloadURL(fileRef).then((url) => {
-const freshUrl = url + '?t=' + Date.now();
-document.getElementById(elemenID).src = freshUrl;
-});
-}
-
-// Contoh penggunaan
-tampilkanGambarTanpaCache('user1/foto.jpg', 'imgPreview');
-</script>
-
-<script>
-// Tambahkan timestamp agar URL selalu unik
-const fileRef = ref(storage, 'gambar.jpg');
-getDownloadURL(fileRef).then((url) => {
-const freshUrl = url + '?t=' + Date.now();
-document.getElementById('imgPreview').src = freshUrl;
-});
-</script>
-
-<script>
-  const slider = document.getElementById("slider");
-  const dots = document.querySelectorAll("#sliderDots .dot");
-  let index = 0;
-  
-  function showSlide(i) {
-    slider.style.transform = `translateX(-${i * 100}%)`;
-    dots.forEach(dot => dot.classList.remove("active-dot"));
-    dots[i].classList.add("active-dot");
-  }
-  
-  setInterval(() => {
-    index = (index + 1) % 3;
-    showSlide(index);
-  }, 5000);
-</script>
-
-<script type="module">
-  // Import Firebase SDK
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-  import {
-    getFirestore, collection, addDoc, getDocs, onSnapshot,
-    query, orderBy, doc, updateDoc, deleteDoc,
-    serverTimestamp, increment, getDoc
-  } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
-  import {
-    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    signOut, onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
-  import {
-    getStorage, ref, uploadBytes, getDownloadURL
-  } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-storage.js";
-
-  // Konfigurasi Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyCIDtHVWRQiB-tmOWSK4mnexR_J2SAq790",
-    authDomain: "funhub-3f848.firebaseapp.com",
-    projectId: "funhub-3f848",
-    storageBucket: "funhub-3f848.appspot.com",
-    messagingSenderId: "922163960068",
-    appId: "1:922163960068:web:ab2fd526a8ac67fe095851"
-  };
-
-  // Inisialisasi Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
-  const storage = getStorage(app);
-
-  // ======================== AUTH ========================
-  window.registerUser = async function(email, password) {
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      alert('Akun berhasil dibuat');
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-
-  window.loginUser = async function(email, password) {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      alert('Login berhasil');
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-
-  window.logoutUser = async function() {
-    await signOut(auth);
-    alert('Logout berhasil');
-  };
-
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      console.log("Login sebagai:", user.email);
-      // Tampilkan UI user
-    } else {
-      console.log("Tidak login");
-    }
-  });
-
-  // ======================== POSTING ========================
-  window.addPost = async function() {
-    const title = document.getElementById('title').value;
-    const desc = document.getElementById('desc').value;
-    const fileInput = document.getElementById('mediaInput');
-    let mediaURL = "";
-
-    if (fileInput.files.length > 0) {
-      const file = fileInput.files[0];
-      const storageRef = ref(storage, 'posts/' + Date.now() + '_' + file.name);
-      const snapshot = await uploadBytes(storageRef, file);
-      mediaURL = await getDownloadURL(snapshot.ref);
-    }
-
-    await addDoc(collection(db, 'posts'), {
-      title,
-      desc,
-      mediaURL,
-      createdAt: serverTimestamp(),
-      likes: 0,
-      dislikes: 0,
-      comments: []
-    });
-
-    alert("Post berhasil diupload");
-  };
-
-  // ======================== TAMPIL POST ========================
-  window.loadPosts = function(callback) {
-    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-    onSnapshot(q, snapshot => {
-      const posts = [];
-      snapshot.forEach(doc => {
-        posts.push({ id: doc.id, ...doc.data() });
-      });
-      callback(posts);
-    });
-  };
-
-  // ======================== LIKE / DISLIKE ========================
-  window.toggleLike = async function(postId, isLike = true) {
-    const postRef = doc(db, 'posts', postId);
-    const field = isLike ? 'likes' : 'dislikes';
-    await updateDoc(postRef, { [field]: increment(1) });
-  };
-
-  // ======================== KOMENTAR ========================
-  window.addComment = async function(postId, comment) {
-    const postRef = doc(db, 'posts', postId);
-    const postSnap = await getDoc(postRef);
-    const data = postSnap.data();
-    const comments = data.comments || [];
-    comments.push({ text: comment, createdAt: new Date().toISOString() });
-    await updateDoc(postRef, { comments });
-  };
-
-  // ======================== PESAN ========================
-  window.sendMessage = async function(to, message) {
-    await addDoc(collection(db, 'messages'), {
-      to,
-      message,
-      from: auth.currentUser?.email || "Anonim",
-      createdAt: serverTimestamp()
-    });
-  };
-
-  window.loadMessages = function(callback) {
-    const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
-    onSnapshot(q, snapshot => {
-      const messages = [];
-      snapshot.forEach(doc => {
-        messages.push(doc.data());
-      });
-      callback(messages);
-    });
-  };
-
-  // ======================== NOTIFIKASI ========================
-  window.loadNotifications = function(callback) {
-    const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'));
-    onSnapshot(q, snapshot => {
-      const notifs = [];
-      snapshot.forEach(doc => {
-        notifs.push(doc.data());
-      });
-      callback(notifs);
-    });
-  };
-
-  // ======================== SEARCH ========================
-  window.searchPosts = async function(keyword) {
-    const snapshot = await getDocs(collection(db, 'posts'));
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      .filter(post =>
-        post.title.toLowerCase().includes(keyword.toLowerCase()) ||
-        post.desc.toLowerCase().includes(keyword.toLowerCase())
-      );
-  };
-</script>
-
-    <script>
-    // Show page
-  window.navigateTo = function (pageId) {
-    // Sembunyikan semua section
-    document.querySelectorAll("section").forEach(section => {
-      section.style.display = "none";
-    });
-
-    // Tampilkan section yang dipilih
-    const target = document.getElementById(pageId);
-    if (target) {
-      target.style.display = "block";
-    }
-
-    // Navigasi Bawah: aktif/non-aktif
-    document.querySelectorAll("#nav-bottom a").forEach(link => {
-      link.classList.remove("active");
-    });
-
-    const btn = document.getElementById("btn-" + pageId);
-    if (btn) {
-      btn.classList.add("active");
-    }
-
-    // Dapatkan elemen navigasi atas & bawah
-    const navTop = document.querySelector("header");
-    const navBottom = document.getElementById("nav-bottom");
-
-    // Daftar halaman yang menyembunyikan navigasi atas dan bawah
-    const hideBoth = ["login", "daftar", "pesan", "notifikasi", "pengaturan"];
-    const hideTopOnly = ["lihat-profil", "explore"];
-
-    // Atur visibilitas navigasi atas & bawah
-    if (hideBoth.includes(pageId)) {
-      if (navTop) navTop.style.display = "none";
-      if (navBottom) navBottom.style.display = "none";
-    } else if (hideTopOnly.includes(pageId)) {
-      if (navTop) navTop.style.display = "none";
-      if (navBottom) navBottom.style.display = "flex";
-    } else {
-      if (navTop) navTop.style.display = "flex";
-      if (navBottom) navBottom.style.display = "flex";
-    }
-
-    // Tutup dropdown jika terbuka
-    const dropdown = document.getElementById("dropdown-menu");
-    if (dropdown) dropdown.style.display = "none";
-  };
-
-  // Toggle dropdown profil
-  window.toggleDropdown = function () {
-    const menu = document.getElementById("dropdown-menu");
-    menu.style.display = (menu.style.display === "block") ? "none" : "block";
-  };
-
-  // Tutup dropdown jika klik di luar area
-  window.addEventListener('click', function (e) {
-    const menu = document.getElementById("dropdown-menu");
-    const dropdown = document.querySelector(".dropdown");
-    if (menu && dropdown && !dropdown.contains(e.target)) {
-      menu.style.display = "none";
-    }
-  });
-
-
-// ========== Modal ==========
-window.openPostModal = function() {
-  const modal = document.getElementById("postModal");
-  modal.style.display = "flex";
-  document.getElementById("nav-bottom").style.display = "none";
-};
-
-window.closePostModal = function() {
-  document.getElementById("postModal").style.display = "none";
-  document.getElementById("nav-bottom").style.display = "flex";
-};
-
-window.cancelPost = function() {
-  document.getElementById("postModal").style.display = "none";
-};
-
-// ========== File Preview ==========
-window.handleFileUpload = function() {
-  const file = document.getElementById("uploadFile").files[0];
-  if (!file) return;
-  
-  const preview = document.getElementById("preview");
-  const container = document.getElementById("previewContainer");
-  preview.style.display = "block";
-  container.innerHTML = "";
-  
-  const url = URL.createObjectURL(file);
-  if (file.type.startsWith("image")) {
-    container.innerHTML = `<img src="${url}" style="width:100%;">`;
-  } else if (file.type.startsWith("video")) {
-    container.innerHTML = `<video src="${url}" controls style="width:100%;"></video>`;
-  }
-};
-
-// ========== Link Preview ==========
-window.handleLinkInput = function() {
-  const url = document.getElementById("media").value;
-  const preview = document.getElementById("preview");
-  const container = document.getElementById("previewContainer");
-  
-  if (!url.trim()) {
-    preview.style.display = "none";
-    return;
-  }
-  
-  preview.style.display = "block";
-  if (url.endsWith(".jpg") || url.endsWith(".png")) {
-    container.innerHTML = `<img src="${url}" style="width:100%;">`;
-  } else if (url.endsWith(".mp4")) {
-    container.innerHTML = `<video src="${url}" controls style="width:100%;"></video>`;
-  } else if (url.includes("youtube.com") || url.includes("youtu.be")) {
-    const youtubeID = url.split("v=")[1]?.split("&")[0] || url.split("/").pop();
-    container.innerHTML = `<iframe width="100%" height="250" src="https://www.youtube.com/embed/${youtubeID}" frameborder="0" allowfullscreen></iframe>`;
-  } else {
-    container.innerHTML = `<p style="color:gray;">Preview tidak tersedia</p>`;
-  }
-};
-
-// ========== Post Ke Firebase ==========
-window.addPost = async function() {
-  const title = document.getElementById("title").value;
-  const desc = document.getElementById("desc").value;
-  const mediaLink = document.getElementById("media").value;
-  const fileInput = document.getElementById("uploadFile");
-  
-  let mediaURL = "";
-  
-  if (fileInput.files.length > 0) {
-    const file = fileInput.files[0];
-    const storageRef = ref(storage, 'posts/' + Date.now() + '_' + file.name);
-    const snapshot = await uploadBytes(storageRef, file);
-    mediaURL = await getDownloadURL(snapshot.ref);
-  } else if (mediaLink.trim()) {
-    mediaURL = mediaLink.trim();
-  }
-  
-  await addDoc(collection(db, 'posts'), {
-    title,
-    desc,
-    mediaURL,
-    createdAt: serverTimestamp(),
-    likes: 0,
-    dislikes: 0,
-    comments: []
-  });
-  
-  alert("Postingan berhasil dikirim!");
-  document.getElementById("postModal").style.display = "none";
-  
-  // Reset form
-  document.getElementById("title").value = "";
-  document.getElementById("desc").value = "";
-  document.getElementById("media").value = "";
-  document.getElementById("uploadFile").value = "";
-  document.getElementById("preview").style.display = "none";
-};
-
-// ========== Load Postingan ==========
-window.loadPosts = function() {
-  const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-  
-  onSnapshot(q, snapshot => {
-    const posts = [];
-    snapshot.forEach(doc => {
-      posts.push({ id: doc.id, ...doc.data() });
-    });
-    renderPosts(posts);
-  });
-};
-
-// ========== Render Postingan ke HTML ==========
-function renderPosts(posts) {
-  const container = document.getElementById('postContainer');
-  if (!container) return;
-  
-  container.innerHTML = '';
-  posts.forEach(post => {
-    const card = document.createElement('div');
-    card.style = "background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1);";
-    
-    let mediaHTML = '';
-    if (post.mediaURL.includes("youtube.com") || post.mediaURL.includes("youtu.be")) {
-      const youtubeID = post.mediaURL.split("v=")[1]?.split("&")[0] || post.mediaURL.split("/").pop();
-      mediaHTML = `<iframe width="100%" height="200" src="https://www.youtube.com/embed/${youtubeID}" frameborder="0" allowfullscreen></iframe>`;
-    } else if (post.mediaURL.endsWith(".mp4")) {
-      mediaHTML = `<video src="${post.mediaURL}" controls style="width:100%;"></video>`;
-    } else {
-      mediaHTML = `<img src="${post.mediaURL}" style="width:100%; height:auto;">`;
-    }
-    
-    card.innerHTML = `
-      ${mediaHTML}
-      <div style="padding:12px;">
-        <h4 style="margin:0; font-size:16px;">${post.title}</h4>
-        <p style="color:#555; font-size:14px; margin:4px 0;">${post.desc}</p>
-        <div style="display:flex; justify-content:space-between; margin-top:8px;">
-          <!-- Tombol Like, Dislike, Komentar, Share (placeholder) -->
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-// ========== Jalankan Saat Halaman Dimuat ==========
-window.addEventListener('DOMContentLoaded', () => {
-  loadPosts();
-});
-</script>
+<script type="module" src="script.js"></script>
 </body>
 </html>
