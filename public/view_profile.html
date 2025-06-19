@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funhub - Profil Pengguna</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="profile-page">
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"><h1>Funhub</h1></div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Beranda</a></li>
+                    <li><a href="explore.html"><i class="fas fa-compass"></i> Jelajahi</a></li>
+                    <li><a href="notifications.html"><i class="fas fa-bell"></i> Notifikasi</a></li>
+                    <li><a href="messages.html"><i class="fas fa-envelope"></i> Pesan</a></li>
+                    <li><a href="profile.html"><i class="fas fa-user-circle"></i> Profil</a></li>
+                    <li><a href="settings.html"><i class="fas fa-cog"></i> Pengaturan</a></li>
+                </ul>
+            </nav>
+            <a href="create_post.html" class="create-post-btn">Buat Post</a>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <a href="javascript:history.back()" class="back-button"><i class="fas fa-arrow-left"></i></a>
+                <h2 id="profileUsernameTitle">Profil Pengguna</h2>
+            </header>
+
+            <section class="page-content profile-section">
+                <div class="profile-header-card" id="profileHeader">
+                    <p style="text-align: center; padding: 20px;">Memuat profil...</p>
+                </div>
+
+                <div class="profile-tabs" id="profileTabs" style="display:none;">
+                    <button class="tab-button active" data-tab="posts">Postingan</button>
+                    <button class="tab-button" data-tab="likes">Suka</button>
+                    <button class="tab-button" data-tab="saved">Tersimpan</button>
+                </div>
+
+                <div class="user-posts-grid explore-grid" id="userPostsGrid">
+                    <p style="text-align: center; padding: 20px;">Memuat postingan pengguna...</p>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <ul>
+                <li><a href="index.html"><i class="fas fa-home"></i> Beranda</a></li>
+                <li><a href="create_post.html" class="create-post-mobile"><i class="fas fa-plus-square"></i></a></li>
+                <li><a href="explore.html"><i class="fas fa-compass"></i> Explore</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="overlay"></div>
+    <script type="module">
+        import { db } from './firebase-config.js'; // Impor instance Firestore
+        import { doc, getDoc, collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('id');
+            const profileHeader = document.getElementById('profileHeader');
+            const userPostsGrid = document.getElementById('userPostsGrid');
+            const profileUsernameTitle = document.getElementById('profileUsernameTitle');
+            const profileTabs = document.getElementById('profileTabs');
+
+            if (userId) {
+                // Fetch User Data
+                try {
+                    const userRef = doc(db, 'users', userId);
+                    const userSnap = await getDoc(userRef);
+
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        profileUsernameTitle.textContent = `@${userData.username}`;
+                        profileHeader.innerHTML = `
+                            <img src="${userData.profilePic || 'https://via.placeholder.com/150/CCCCCC/FFFFFF?text=U'}" alt="Foto Profil Pengguna" class="profile-avatar-large">
+                            <div class="profile-info">
+                                <h2>@${userData.username}</h2>
+                                <p class="bio">${userData.bio || 'Tidak ada bio.'}</p>
+                                <div class="profile-stats">
+                                    <span><strong>${userData.postsCount || 0}</strong> Postingan</span>
+                                    <span><strong>${userData.followersCount || 0}</strong> Pengikut</span>
+                                    <span><strong>${userData.followingCount || 0}</strong> Mengikuti</span>
+                                </div>
+                                <button class="follow-button">Ikuti</button>
+                            </div>
+                        `;
+                        profileTabs.style.display = 'flex'; // Show tabs after profile loaded
+
+                        // Fetch User Posts
+                        const postsQuery = query(collection(db, 'posts'), where('userId', '==', userId), orderBy('timestamp', 'desc'));
+                        const postsSnap = await getDocs(postsQuery);
+
+                        userPostsGrid.innerHTML = ''; // Clear loading message
+
+                        if (postsSnap.empty) {
+                            userPostsGrid.innerHTML = '<p style="text-align: center; padding: 20px; color: #777;">Pengguna ini belum memiliki postingan.</p>';
+                        } else {
+                            postsSnap.forEach(postDoc => {
+                                const postData = postDoc.data();
+                                const postCard = document.createElement('div');
+                                postCard.className = 'explore-card post-card';
+                                postCard.onclick = () => location.href=`view_post.html?id=${postDoc.id}`;
+                                postCard.innerHTML = `
+                                    <img src="${postData.imageUrl || 'https://via.placeholder.com/150/EEEEEE/FFFFFF?text=Post'}" alt="${postData.title}">
+                                    <h3>${postData.title}</h3>
+                                    <p>@${userData.username}</p>
+                                `;
+                                userPostsGrid.appendChild(postCard);
+                            });
+                        }
+
+                    } else {
+                        profileHeader.innerHTML = '<p style="text-align: center; padding: 20px;">Pengguna tidak ditemukan.</p>';
+                        profileUsernameTitle.textContent = "Pengguna Tidak Ditemukan";
+                        profileTabs.style.display = 'none';
+                        userPostsGrid.innerHTML = '';
+                    }
+                } catch (error) {
+                    console.error("Error getting user profile:", error);
+                    profileHeader.innerHTML = '<p style="text-align: center; padding: 20px; color: red;">Terjadi kesalahan saat memuat profil pengguna.</p>';
+                }
+            } else {
+                profileHeader.innerHTML = '<p style="text-align: center; padding: 20px;">ID Pengguna tidak diberikan.</p>';
+                profileUsernameTitle.textContent = "Profil";
+                profileTabs.style.display = 'none';
+                userPostsGrid.innerHTML = '';
+            }
+
+            // Tab functionality (client-side only for now, needs backend for 'Likes'/'Saved')
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    // In a real app, this would trigger loading data for 'likes' or 'saved'
+                    const tab = this.dataset.tab;
+                    if (tab !== 'posts') {
+                        userPostsGrid.innerHTML = `<p style="text-align: center; padding: 20px; color: #777;">Fitur "${this.textContent}" belum tersedia.</p>`;
+                    } else {
+                        // Re-load posts if somehow navigated away
+                        // For a real app, you'd store the initial posts or refetch.
+                        // For this example, it will just keep the loaded posts.
+                    }
+                });
+            });
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

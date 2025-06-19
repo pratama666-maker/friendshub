@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funhub - Profil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="profile-page"> <div class="container">
+        <aside class="sidebar">
+            <div class="logo"><h1>Funhub</h1></div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Beranda</a></li>
+                    <li><a href="explore.html"><i class="fas fa-compass"></i> Jelajahi</a></li>
+                    <li><a href="notifications.html"><i class="fas fa-bell"></i> Notifikasi</a></li>
+                    <li><a href="messages.html"><i class="fas fa-envelope"></i> Pesan</a></li>
+                    <li><a href="profile.html" class="active"><i class="fas fa-user-circle"></i> Profil</a></li>
+                    <li><a href="settings.html"><i class="fas fa-cog"></i> Pengaturan</a></li>
+                </ul>
+            </nav>
+            <a href="create_post.html" class="create-post-btn">Buat Post</a>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar" style="display: none;">
+                </header>
+            
+            <section class="profile-header-section">
+                <a href="settings.html" class="profile-settings-btn" title="Pengaturan Profil">
+                    <i class="fas fa-cog"></i>
+                </a>
+
+                <img src="https://via.placeholder.com/100" alt="Profil Pengguna" class="profile-avatar" id="profile-avatar">
+                <h2 class="profile-username" id="profile-username">Nama Pengguna</h2>
+                <span class="profile-handle" id="profile-handle">@username</span>
+                <p class="profile-bio" id="profile-bio">Ini adalah bio pengguna. Tuliskan sesuatu yang menarik tentang diri Anda di sini!</p>
+                
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <strong id="stat-posts">0</strong>
+                        <span>Postingan</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong id="stat-fans">0</strong>
+                        <span>Fans</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong id="stat-haters">0</strong>
+                        <span>Mengikuti</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="profile-posts-section">
+                <h3>Postingan Saya</h3>
+                <div class="user-posts-grid" id="user-posts-grid">
+                    <p style="text-align: center; color: var(--text-color-light);">Memuat postingan Anda...</p>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <ul>
+                <li><a href="index.html"><i class="fas fa-home"></i> Beranda</a></li>
+                <li><a href="create_post.html" class="create-post-mobile"><i class="fas fa-plus-square"></i></a></li>
+                <li><a href="explore.html"><i class="fas fa-compass"></i> Explore</a></li>
+            </ul>
+        </nav>
+    </div>
+    
+        <nav class="bottom-nav">
+            <ul>
+                <li><a href="index.html" class="active"><i class="fas fa-home"></i> Beranda</a></li>
+                <li><a href="create_post.html" class="create-post-mobile"><i class="fas fa-plus-square"></i></a></li>
+                <li><a href="explore.html"><i class="fas fa-compass"></i> Explore</a></li>
+            </ul>
+        </nav>
+    </div>
+    
+    <div class="overlay"></div>
+    <script type="module" src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funhub - Kategori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="category-page">
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"><h1>Funhub</h1></div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Beranda</a></li>
+                    <li><a href="explore.html"><i class="fas fa-compass"></i> Jelajahi</a></li>
+                    <li><a href="notifications.html"><i class="fas fa-bell"></i> Notifikasi</a></li>
+                    <li><a href="messages.html"><i class="fas fa-envelope"></i> Pesan</a></li>
+                    <li><a href="profile.html"><i class="fas fa-user-circle"></i> Profil</a></li>
+                    <li><a href="settings.html"><i class="fas fa-cog"></i> Pengaturan</a></li>
+                </ul>
+            </nav>
+            <a href="create_post.html" class="create-post-btn">Buat Post</a>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <a href="javascript:history.back()" class="back-button"><i class="fas fa-arrow-left"></i></a>
+                <h2 id="categoryTitle">Kategori</h2>
+            </header>
+
+            <section class="page-content category-section">
+                <div class="explore-search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Cari di kategori ini...">
+                </div>
+
+                <div class="explore-section">
+                    <h2 id="categoryPostsTitle">Postingan Terbaru di Kategori Ini</h2>
+                    <div class="explore-grid" id="categoryPostsGrid">
+                        <p style="text-align: center; padding: 20px;">Memuat postingan kategori...</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <ul>
+                <li><a href="index.html"><i class="fas fa-home"></i> Beranda</a></li>
+                <li><a href="create_post.html" class="create-post-mobile"><i class="fas fa-plus-square"></i></a></li>
+                <li><a href="explore.html"><i class="fas fa-compass"></i> Explore</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="overlay"></div>
+    <script type="module">
+        import { db } from './firebase-config.js'; // Impor instance Firestore
+        import { collection, query, where, orderBy, getDocs, doc, getDoc } from 'firebase/firestore';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryName = urlParams.get('name');
+            const categoryTitle = document.getElementById('categoryTitle');
+            const categoryPostsTitle = document.getElementById('categoryPostsTitle');
+            const categoryPostsGrid = document.getElementById('categoryPostsGrid');
+
+            if (categoryName) {
+                categoryTitle.textContent = `Kategori: ${categoryName}`;
+                categoryPostsTitle.textContent = `Postingan Terbaru di ${categoryName}`;
+
+                try {
+                    const postsQuery = query(
+                        collection(db, 'posts'),
+                        where('category', '==', categoryName),
+                        orderBy('timestamp', 'desc')
+                    );
+                    const postsSnap = await getDocs(postsQuery);
+
+                    categoryPostsGrid.innerHTML = ''; // Clear loading message
+
+                    if (postsSnap.empty) {
+                        categoryPostsGrid.innerHTML = '<p style="text-align: center; padding: 20px; color: #777;">Belum ada postingan di kategori ini.</p>';
+                    } else {
+                        for (const postDoc of postsSnap.docs) {
+                            const postData = postDoc.data();
+                            const userId = postData.userId;
+
+                            let username = 'Pengguna Tidak Dikenal';
+                            if (userId) {
+                                const userRef = doc(db, 'users', userId);
+                                const userSnap = await getDoc(userRef);
+                                if (userSnap.exists()) {
+                                    username = userSnap.data().username;
+                                }
+                            }
+
+                            const postCard = document.createElement('div');
+                            postCard.className = 'explore-card post-card';
+                            postCard.onclick = () => location.href=`view_post.html?id=${postDoc.id}`;
+                            postCard.innerHTML = `
+                                <img src="${postData.imageUrl || 'https://via.placeholder.com/150/EEEEEE/FFFFFF?text=Post'}" alt="${postData.title}">
+                                <h3>${postData.title}</h3>
+                                <p>@${username}</p>
+                            `;
+                            categoryPostsGrid.appendChild(postCard);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error getting category posts:", error);
+                    categoryPostsGrid.innerHTML = '<p style="text-align: center; padding: 20px; color: red;">Terjadi kesalahan saat memuat postingan kategori.</p>';
+                }
+            } else {
+                categoryTitle.textContent = "Kategori Tidak Ditemukan";
+                categoryPostsTitle.textContent = "Pilih Kategori";
+                categoryPostsGrid.innerHTML = '<p style="text-align: center; padding: 20px;">Nama kategori tidak diberikan.</p>';
+            }
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

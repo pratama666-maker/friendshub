@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funhub - Pesan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="messages-page"> <div class="container">
+        <aside class="sidebar">
+            <div class="logo"><h1>Funhub</h1></div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Beranda</a></li>
+                    <li><a href="explore.html"><i class="fas fa-compass"></i> Jelajahi</a></li>
+                    <li><a href="notifications.html"><i class="fas fa-bell"></i> Notifikasi</a></li>
+                    <li><a href="messages.html" class="active"><i class="fas fa-envelope"></i> Pesan</a></li>
+                    <li><a href="profile.html"><i class="fas fa-user-circle"></i> Profil</a></li>
+                    <li><a href="settings.html"><i class="fas fa-cog"></i> Pengaturan</a></li>
+                </ul>
+            </nav>
+            <a href="create_post.html" class="create-post-btn">Buat Post</a>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <i class="fas fa-arrow-left back-button-mobile" onclick="history.back()"></i> <div class="header-center-content">
+                    <h1 class="app-title-mobile">Pesan</h1> <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Cari pesan atau pengguna...">
+                    </div>
+                </div>
+
+                <div class="user-profile-summary">
+                    <img src="https://via.placeholder.com/40" alt="Profil Pengguna" class="profile-pic-desktop">
+                    <span class="username-desktop">Nama Pengguna</span>
+                    <div class="mobile-header-icons">
+                        <a href="notifications.html"><i class="far fa-bell"></i></a>
+                        <a href="messages.html"><i class="far fa-envelope"></i></a>
+                        <a href="profile.html"><i class="far fa-user-circle"></i></a>
+                    </div>
+                </div>
+            </header>
+            
+            <section class="page-content messages-container">
+                <div class="message-categories">
+                    <span class="active" data-category="all">Semua Pesan</span>
+                    <span data-category="unread">Belum Dibaca</span>
+                    <span data-category="groups">Grup</span>
+                    <span data-category="requests">Permintaan</span>
+                </div>
+                
+                <div id="messages-list">
+                    <p style="text-align: center; color: var(--text-color-light);">Memuat pesan...</p>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <ul>
+                <li><a href="index.html"><i class="fas fa-home"></i> Beranda</a></li>
+                <li><a href="create_post.html" class="create-post-mobile"><i class="fas fa-plus-square"></i></a></li>
+                <li><a href="explore.html"><i class="fas fa-compass"></i> Explore</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="overlay"></div>
+    <script type="module" src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

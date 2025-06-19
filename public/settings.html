@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funhub - Pengaturan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="settings-page"> <div class="container">
+        <aside class="sidebar">
+            <div class="logo"><h1>Funhub</h1></div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Beranda</a></li>
+                    <li><a href="explore.html"><i class="fas fa-compass"></i> Jelajahi</a></li>
+                    <li><a href="notifications.html"><i class="fas fa-bell"></i> Notifikasi</a></li>
+                    <li><a href="messages.html"><i class="fas fa-envelope"></i> Pesan</a></li>
+                    <li><a href="profile.html"><i class="fas fa-user-circle"></i> Profil</a></li>
+                    <li><a href="settings.html" class="active"><i class="fas fa-cog"></i> Pengaturan</a></li>
+                </ul>
+            </nav>
+            <a href="create_post.html" class="create-post-btn">Buat Post</a>
+        </aside>
+
+        <main class="main-content">
+            <i class="fas fa-arrow-left back-button-mobile" onclick="history.back()"></i>
+
+            <header class="top-bar" style="display: none;">
+                </header>
+            
+            <section class="page-content">
+                <div class="settings-section">
+                    <h2>Akun</h2>
+                    <button class="settings-nav-button" onclick="window.location.href='edit_profile.html';">
+                        <i class="fas fa-user-edit"></i> Edit Profil
+                    </button>
+                    <button class="settings-nav-button" onclick="window.location.href='change_password.html';">
+                        <i class="fas fa-key"></i> Ganti Password
+                    </button>
+                </div>
+
+                <div class="settings-section">
+                    <h2>Pengaturan Lainnya</h2>
+                    <div class="settings-item">
+                        <label for="push-notifications-toggle">Aktifkan Notifikasi Push</label>
+                        <input type="checkbox" id="push-notifications-toggle" checked>
+                    </div>
+                    <div class="settings-item">
+                        <label for="dark-mode-toggle">Mode Gelap</label>
+                        <input type="checkbox" id="dark-mode-toggle">
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h2>Bantuan & Dukungan</h2>
+                    <button class="settings-nav-button" onclick="alert('Membuka Pusat Bantuan...'); return false;">
+                        <i class="fas fa-question-circle"></i> Pusat Bantuan
+                    </button>
+                    <button class="settings-nav-button" onclick="alert('Membuka halaman Hubungi Kami...'); return false;">
+                        <i class="fas fa-headset"></i> Hubungi Kami
+                    </button>
+                    <button class="settings-nav-button" onclick="alert('Membuka Kebijakan Privasi...'); return false;">
+                        <i class="fas fa-shield-alt"></i> Kebijakan Privasi
+                    </button>
+                    <button class="settings-nav-button" onclick="alert('Terima kasih atas donasi Anda! (Fungsionalitas donasi perlu diimplementasikan)'); return false;">
+                        <i class="fas fa-hand-holding-usd"></i> Donasi Dev
+                    </button>
+                </div>
+
+                <div class="settings-section" id="logout-section" style="display: none;">
+                    <h2>Sesi</h2>
+                    <button id="logout-btn">Logout</button>
+                    <div id="auth-status" style="margin-top: 10px; text-align: center; color: var(--text-color-light);"></div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <ul>
+                <li><a href="index.html"><i class="fas fa-home"></i> Beranda</a></li>
+                <li><a href="create_post.html" class="create-post-mobile"><i class="fas fa-plus-square"></i></a></li>
+                <li><a href="explore.html"><i class="fas fa-compass"></i> Explore</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="overlay"></div>
+    <script type="module" src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

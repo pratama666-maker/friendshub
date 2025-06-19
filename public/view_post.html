@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funhub - Detail Postingan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="post-detail-page">
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"><h1>Funhub</h1></div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Beranda</a></li>
+                    <li><a href="explore.html"><i class="fas fa-compass"></i> Jelajahi</a></li>
+                    <li><a href="notifications.html"><i class="fas fa-bell"></i> Notifikasi</a></li>
+                    <li><a href="messages.html"><i class="fas fa-envelope"></i> Pesan</a></li>
+                    <li><a href="profile.html"><i class="fas fa-user-circle"></i> Profil</a></li>
+                    <li><a href="settings.html"><i class="fas fa-cog"></i> Pengaturan</a></li>
+                </ul>
+            </nav>
+            <a href="create_post.html" class="create-post-btn">Buat Post</a>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <a href="javascript:history.back()" class="back-button"><i class="fas fa-arrow-left"></i></a>
+                <h2>Postingan</h2>
+            </header>
+
+            <section class="page-content post-detail-section">
+                <div class="post-card-large" id="postDetailCard">
+                    <p style="text-align: center; padding: 20px;">Memuat postingan...</p>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <ul>
+                <li><a href="index.html"><i class="fas fa-home"></i> Beranda</a></li>
+                <li><a href="create_post.html" class="create-post-mobile"><i class="fas fa-plus-square"></i></a></li>
+                <li><a href="explore.html"><i class="fas fa-compass"></i> Explore</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="overlay"></div>
+    <script type="module">
+        import { db } from './firebase-config.js'; // Impor instance Firestore
+        import { doc, getDoc, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const postId = urlParams.get('id');
+            const postDetailCard = document.getElementById('postDetailCard');
+
+            if (postId) {
+                try {
+                    const postRef = doc(db, 'posts', postId);
+                    const postSnap = await getDoc(postRef);
+
+                    if (postSnap.exists()) {
+                        const postData = postSnap.data();
+                        const userId = postData.userId; // Dapatkan userId dari postingan
+
+                        let userData = { username: 'Pengguna Tidak Dikenal', profilePic: 'https://via.placeholder.com/50/CCCCCC/FFFFFF?text=?' };
+                        if (userId) {
+                            const userRef = doc(db, 'users', userId);
+                            const userSnap = await getDoc(userRef);
+                            if (userSnap.exists()) {
+                                userData = userSnap.data();
+                            }
+                        }
+
+                        // Untuk Realtime Comments (jika menggunakan Realtime DB)
+                        // import { rtdb } from './firebase-config.js';
+                        // import { ref, onValue } from 'firebase/database';
+                        // const commentsRef = ref(rtdb, 'postComments/' + postId);
+                        // onValue(commentsRef, (snapshot) => {
+                        //     const commentsData = snapshot.val();
+                        //     // Render comments here
+                        //     console.log('Realtime comments:', commentsData);
+                        // });
+
+
+                        postDetailCard.innerHTML = `
+                            <img src="${postData.imageUrl || 'https://via.placeholder.com/600x400/FF6B6B/FFFFFF?text=Gambar+Tidak+Tersedia'}" alt="Gambar Postingan">
+                            <div class="post-header">
+                                <img src="${userData.profilePic || 'https://via.placeholder.com/50/CCCCCC/FFFFFF?text=U'}" alt="Foto Profil Pengguna" class="user-avatar-small" onclick="location.href='view_profile.html?id=${userId}';">
+                                <div class="user-info">
+                                    <h3><a href="view_profile.html?id=${userId}">@${userData.username}</a></h3>
+                                    <p class="timestamp">${new Date(postData.timestamp.toDate()).toLocaleString()}</p>
+                                </div>
+                            </div>
+                            <div class="post-body">
+                                <h2>${postData.title}</h2>
+                                <p>${postData.content}</p>
+                            </div>
+                            <div class="post-actions">
+                                <span><i class="fas fa-heart"></i> ${postData.likesCount || 0}</span>
+                                <span><i class="fas fa-comment"></i> ${postData.commentsCount || 0}</span>
+                                <span><i class="fas fa-share-alt"></i> Bagikan</span>
+                            </div>
+
+                            <div class="comments-section">
+                                <h3>Komentar (${postData.commentsCount || 0})</h3>
+                                <div class="comment-input">
+                                    <input type="text" placeholder="Tambahkan komentar Anda...">
+                                    <button><i class="fas fa-paper-plane"></i></button>
+                                </div>
+                                <div class="comment-list" id="commentList">
+                                    <p style="text-align: center; color: #777;">Memuat komentar...</p>
+                                    </div>
+                            </div>
+                        `;
+
+                        // Load comments for the post (using Firestore as an example)
+                        const commentsCollectionRef = collection(db, 'posts', postId, 'comments');
+                        const commentsQuery = query(commentsCollectionRef, orderBy('timestamp', 'asc'), limit(10));
+                        const commentsSnap = await getDocs(commentsQuery);
+                        const commentListDiv = document.getElementById('commentList');
+                        commentListDiv.innerHTML = ''; // Clear loading message
+
+                        if (commentsSnap.empty) {
+                            commentListDiv.innerHTML = '<p style="text-align: center; color: #777;">Belum ada komentar.</p>';
+                        } else {
+                            commentsSnap.forEach(async (commentDoc) => {
+                                const commentData = commentDoc.data();
+                                let commentUser = { username: 'Anonim', profilePic: 'https://via.placeholder.com/40/CCCCCC/FFFFFF?text=?' };
+
+                                if (commentData.userId) {
+                                    const commentUserRef = doc(db, 'users', commentData.userId);
+                                    const commentUserSnap = await getDoc(commentUserRef);
+                                    if (commentUserSnap.exists()) {
+                                        commentUser = commentUserSnap.data();
+                                    }
+                                }
+
+                                const commentItem = document.createElement('div');
+                                commentItem.className = 'comment-item';
+                                commentItem.innerHTML = `
+                                    <img src="${commentUser.profilePic || 'https://via.placeholder.com/40/CCCCCC/FFFFFF?text=U'}" alt="User" class="user-avatar-xsmall">
+                                    <div class="comment-content">
+                                        <p><strong><a href="view_profile.html?id=${commentData.userId}">@${commentUser.username}</a></strong> ${commentData.text}</p>
+                                        <span class="timestamp">${new Date(commentData.timestamp.toDate()).toLocaleString()}</span>
+                                    </div>
+                                `;
+                                commentListDiv.appendChild(commentItem);
+                            });
+                        }
+
+                    } else {
+                        postDetailCard.innerHTML = '<p style="text-align: center; padding: 20px;">Postingan tidak ditemukan.</p>';
+                    }
+                } catch (error) {
+                    console.error("Error getting post:", error);
+                    postDetailCard.innerHTML = '<p style="text-align: center; padding: 20px; color: red;">Terjadi kesalahan saat memuat postingan.</p>';
+                }
+            } else {
+                postDetailCard.innerHTML = '<p style="text-align: center; padding: 20px;">ID Postingan tidak diberikan.</p>';
+            }
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
