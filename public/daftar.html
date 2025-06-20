@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html>
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,7 +9,7 @@
 <body>
   <div class="container">
     <h2>Daftar</h2>
-    <form id="registerForm">
+    <form id="registerForm" autocomplete="off">
       <div class="input-group">
         <label for="registerPassword">Kata Sandi</label>
         <input type="password" id="registerPassword" required />
@@ -21,26 +22,21 @@
     </form>
     <p>Sudah punya akun? <a href="index.html">Login di sini</a></p>
     <div class="message-box" id="messageBox"></div>
-  </div>  <script type="module">
+  </div>
+
+  <script type="module">
     import {
       auth,
       createUserWithEmailAndPassword,
       onAuthStateChanged,
       db,
       doc,
-      setDoc
+      setDoc,
+      serverTimestamp
     } from './firebase-config.js';
 
     const registerForm = document.getElementById('registerForm');
     const messageBox = document.getElementById('messageBox');
-
-    async function hashEmailFromPassword(password) {
-      const msgUint8 = new TextEncoder().encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      return `user_${hashHex}@anonlogin.funhub.app`;
-    }
 
     function showMessage(msg, type = 'info') {
       messageBox.textContent = msg;
@@ -51,6 +47,21 @@
       }, 5000);
     }
 
+    async function hashEmailFromPassword(password) {
+      try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return `user_${hashHex}@anonlogin.funhub.app`;
+      } catch (e) {
+        showMessage("Browser tidak mendukung hashing", "error");
+        throw e;
+      }
+    }
+
+    // Redirect jika user sudah login
     onAuthStateChanged(auth, (user) => {
       if (user) {
         window.location.href = 'dashboard.html';
@@ -59,6 +70,7 @@
 
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const password = document.getElementById('registerPassword').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
 
@@ -81,14 +93,24 @@
           username: email.split('@')[0],
           avatarUrl: 'https://via.placeholder.com/120/8ab4f8/FFFFFF?text=A',
           bio: 'Saya pengguna anonim di Funhub.',
-          createdAt: new Date()
+          createdAt: serverTimestamp()
         });
 
         showMessage('Pendaftaran berhasil! Mengarahkan...', 'success');
-        window.location.href = 'dashboard.html';
+        setTimeout(() => window.location.href = 'dashboard.html', 1000);
       } catch (err) {
-        showMessage('Daftar gagal: ' + err.message, 'error');
+        console.error("❌ Daftar gagal:", err.code, err.message);
+        let errorMsg = 'Gagal daftar.';
+        if (err.code === 'auth/email-already-in-use') {
+          errorMsg = 'Password ini sudah digunakan sebelumnya.';
+        } else if (err.code === 'auth/weak-password') {
+          errorMsg = 'Gunakan kata sandi lebih kuat.';
+        } else if (err.code === 'auth/invalid-email') {
+          errorMsg = 'Email tidak valid.';
+        }
+        showMessage(errorMsg, 'error');
       }
     });
-  </script></body>
+  </script>
+</body>
 </html>
