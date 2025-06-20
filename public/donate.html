@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donasi - Bantu 9Gaul Tetap Hidup!</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header"><h2><i class="fas fa-laugh-squint"></i> 9Gaul</h2></div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-home"></i> Beranda</a></li>
+                    <li><a href="explore.html"><i class="fas fa-compass"></i> Explore</a></li>
+                    <li><a href="groups.html"><i class="fas fa-users"></i> Grup</a></li>
+                    <li class="separator"></li>
+                    <li><a href="service-center.html"><i class="fas fa-headset"></i> Service Center</a></li>
+                    <li><a href="donate.html" class="active"><i class="fas fa-heart"></i> Donasi</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-profile">
+                <a href="profile.html"><img src="https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P" alt="Profil Pengguna" id="sidebarUserAvatar"></a>
+                <div class="profile-info">
+                    <a href="profile.html"><strong id="sidebarUsername">Loading...</strong></a>
+                    <span class="user-email" id="loggedInEmailSidebar">Loading...</span>
+                </div>
+                <a href="#" class="logout-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <button class="back-button-mobile" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+                <h1>Donasi</h1>
+                <div class="header-actions">
+                    <button class="profile-icon-mobile-header" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i></button>
+                </div>
+            </header>
+
+            <section class="donate-section">
+                <div class="donate-intro card-style">
+                    <h2>Dukung 9Gaul Tetap Hidup!</h2>
+                    <p>9Gaul adalah platform komunitas yang dibangun dengan cinta dan dedikasi. Untuk menjaga server tetap berjalan, mengembangkan fitur baru, dan memberikan pengalaman terbaik bagi Anda, kami membutuhkan dukungan dari komunitas.</p>
+                    <p>Setiap donasi, besar atau kecil, sangat berarti bagi kami dan masa depan 9Gaul. Mari bersama-sama membangun komunitas yang lebih baik!</p>
+                    <img src="https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Terima+Kasih!" alt="Donation Icon" class="donate-hero-image">
+                </div>
+
+                <div class="donate-form-card card-style">
+                    <h3>Pilih Jumlah Donasi</h3>
+                    <div class="donation-amounts">
+                        <button class="amount-btn active" data-amount="10000">Rp 10.000</button>
+                        <button class="amount-btn" data-amount="25000">Rp 25.000</button>
+                        <button class="amount-btn" data-amount="50000">Rp 50.000</button>
+                        <button class="amount-btn" data-amount="100000">Rp 100.000</button>
+                    </div>
+                    <div class="input-group custom-amount">
+                        <label for="customAmount">Atau Masukkan Jumlah Lain:</label>
+                        <input type="number" id="customAmount" placeholder="Contoh: 15000" min="1000" step="1000">
+                    </div>
+
+                    <h3>Metode Pembayaran</h3>
+                    <div class="payment-methods">
+                        <button class="payment-method-btn" data-method="gopay">
+                            <img src="https://via.placeholder.com/50x30/FFFFFF/008800?text=GoPay" alt="GoPay">
+                            <span>GoPay</span>
+                        </button>
+                        <button class="payment-method-btn" data-method="ovo">
+                            <img src="https://via.placeholder.com/50x30/FFFFFF/4B0082?text=OVO" alt="OVO">
+                            <span>OVO</span>
+                        </button>
+                        <button class="payment-method-btn" data-method="dana">
+                            <img src="https://via.placeholder.com/50x30/FFFFFF/1E90FF?text=DANA" alt="DANA">
+                            <span>DANA</span>
+                        </button>
+                        <button class="payment-method-btn" data-method="banktransfer">
+                            <img src="https://via.placeholder.com/50x30/FFFFFF/00008B?text=BANK" alt="Bank Transfer">
+                            <span>Transfer Bank</span>
+                        </button>
+                    </div>
+                    <div class="payment-details-info" id="paymentDetailsInfo">
+                        </div>
+
+                    <button class="button-primary-submit" id="processDonationBtn">Lanjutkan Donasi</button>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span class="nav-text">Beranda</span></a>
+            <a href="explore.html" class="nav-item"><i class="fas fa-compass"></i><span class="nav-text">Explore</span></a>
+            <a href="groups.html" class="nav-item"><i class="fas fa-users"></i><span class="nav-text">Grup</span></a>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { auth, signOut, onAuthStateChanged, db, doc, getDoc } from './firebase-config.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    console.log("User logged in:", user.uid);
+                    await loadUserProfileSidebar(user.uid);
+                } else {
+                    console.log("No user logged in. Redirecting to index.html");
+                    window.location.href = 'index.html';
+                }
+            });
+
+            async function loadUserProfileSidebar(uid) {
+                const userDocRef = doc(db, "users", uid);
+                try {
+                    const userDocSnap = await getDoc(userDocRef);
+                    if (userDocSnap.exists()) {
+                        const userData = userDocSnap.data();
+                        document.getElementById('sidebarUsername').textContent = userData.username || 'Pengguna 9Gaul';
+                        document.getElementById('loggedInEmailSidebar').textContent = userData.email || auth.currentUser.email;
+                        document.getElementById('sidebarUserAvatar').src = userData.avatarUrl || 'https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P';
+                    } else {
+                        console.warn("User profile not found in Firestore for UID:", uid);
+                        document.getElementById('sidebarUsername').textContent = auth.currentUser.email.split('@')[0];
+                        document.getElementById('loggedInEmailSidebar').textContent = auth.currentUser.email;
+                    }
+                } catch (error) {
+                    console.error("Error loading user profile:", error);
+                    document.getElementById('sidebarUsername').textContent = auth.currentUser.email.split('@')[0];
+                    document.getElementById('loggedInEmailSidebar').textContent = auth.currentUser.email;
+                }
+            }
+
+            // Highlighting the active link
+            const path = window.location.pathname.split('/').pop();
+            document.querySelectorAll('.sidebar-nav a, .bottom-nav .nav-item').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === path) {
+                    link.classList.add('active');
+                }
+            });
+
+            // --- Donation Logic (unchanged from previous version, as it's client-side dummy) ---
+            const amountButtons = document.querySelectorAll('.amount-btn');
+            const customAmountInput = document.getElementById('customAmount');
+            const paymentMethodButtons = document.querySelectorAll('.payment-method-btn');
+            const paymentDetailsInfo = document.getElementById('paymentDetailsInfo');
+            const processDonationBtn = document.getElementById('processDonationBtn');
+
+            let selectedAmount = 10000; // Default amount
+            let selectedMethod = '';
+
+            amountButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    amountButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    selectedAmount = parseInt(button.dataset.amount);
+                    customAmountInput.value = '';
+                    displayPaymentDetails(selectedMethod, selectedAmount); // Update details with new amount
+                });
+            });
+
+            customAmountInput.addEventListener('input', () => {
+                amountButtons.forEach(btn => btn.classList.remove('active'));
+                const value = parseInt(customAmountInput.value);
+                if (!isNaN(value) && value >= 1000) {
+                    selectedAmount = value;
+                } else {
+                    selectedAmount = 0;
+                }
+                displayPaymentDetails(selectedMethod, selectedAmount); // Update details with custom amount
+            });
+
+            paymentMethodButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    paymentMethodButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    selectedMethod = button.dataset.method;
+                    displayPaymentDetails(selectedMethod, selectedAmount);
+                });
+            });
+
+            function displayPaymentDetails(method, amount) {
+                let detailsHtml = '';
+                if (!amount || amount < 1000) {
+                     paymentDetailsInfo.innerHTML = '<p class="error-message">Mohon masukkan jumlah donasi minimal Rp 1.000.</p>';
+                     processDonationBtn.disabled = true;
+                     return;
+                }
+                processDonationBtn.disabled = false;
+
+                const formattedAmount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+
+                switch (method) {
+                    case 'gopay':
+                        detailsHtml = `
+                            <p><strong>Jumlah Donasi:</strong> ${formattedAmount}</p>
+                            <p>Silakan scan QRIS berikut dengan aplikasi GoPay Anda:</p>
+                            <img src="https://via.placeholder.com/200/008800/FFFFFF?text=QRIS+GoPay" alt="QRIS GoPay" class="qr-code">
+                            <p>Atau transfer ke nomor GoPay: <strong>0812-3456-7890</strong> (a.n. 9Gaul Official)</p>
+                        `;
+                        break;
+                    case 'ovo':
+                        detailsHtml = `
+                            <p><strong>Jumlah Donasi:</strong> ${formattedAmount}</p>
+                            <p>Silakan transfer ke nomor OVO: <strong>0813-4567-8901</strong> (a.n. 9Gaul Official)</p>
+                            <p>Atau scan QRIS berikut:</p>
+                            <img src="https://via.placeholder.com/200/4B0082/FFFFFF?text=QRIS+OVO" alt="QRIS OVO" class="qr-code">
+                        `;
+                        break;
+                    case 'dana':
+                        detailsHtml = `
+                            <p><strong>Jumlah Donasi:</strong> ${formattedAmount}</p>
+                            <p>Silakan transfer ke nomor DANA: <strong>0814-5678-9012</strong> (a.n. 9Gaul Official)</p>
+                            <p>Atau scan QRIS berikut:</p>
+                            <img src="https://via.placeholder.com/200/1E90FF/FFFFFF?text=QRIS+DANA" alt="QRIS DANA" class="qr-code">
+                        `;
+                        break;
+                    case 'banktransfer':
+                        detailsHtml = `
+                            <p><strong>Jumlah Donasi:</strong> ${formattedAmount}</p>
+                            <p>Silakan transfer ke rekening berikut:</p>
+                            <ul>
+                                <li><strong>Bank BCA:</strong> 1234567890 (a.n. PT. Gaul Digital)</li>
+                                <li><strong>Bank Mandiri:</strong> 0987654321 (a.n. PT. Gaul Digital)</li>
+                            </ul>
+                            <p class="transfer-hint">Mohon sertakan screenshot bukti transfer ke Service Center setelah donasi.</p>
+                        `;
+                        break;
+                    default:
+                        detailsHtml = '<p>Pilih metode pembayaran untuk melihat detail.</p>';
+                        processDonationBtn.disabled = true;
+                        break;
+                }
+                paymentDetailsInfo.innerHTML = detailsHtml;
+            }
+
+            // Initial display of details based on default selected amount
+            displayPaymentDetails(selectedMethod, selectedAmount);
+
+            processDonationBtn.addEventListener('click', () => {
+                if (selectedAmount < 1000) {
+                    alert('Mohon masukkan jumlah donasi minimal Rp 1.000.');
+                    return;
+                }
+                if (!selectedMethod) {
+                    alert('Mohon pilih metode pembayaran.');
+                    return;
+                }
+
+                const confirmation = confirm(`Anda akan berdonasi sebesar ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(selectedAmount)} melalui ${selectedMethod.toUpperCase()}. Lanjutkan?`);
+
+                if (confirmation) {
+                    alert('Donasi Anda berhasil! Terima kasih atas dukungan Anda.');
+                    window.location.href = 'dashboard.html';
+                }
+            });
+        });
+
+        async function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                try {
+                    await signOut(auth);
+                    localStorage.removeItem('lastLoggedInUserId');
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error("Error logging out:", error);
+                    alert('Gagal logout. Coba lagi.');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

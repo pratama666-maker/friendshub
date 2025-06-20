@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Postingan Baru - 9Gaul</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header"><h2><i class="fas fa-laugh-squint"></i> 9Gaul</h2></div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-home"></i> Beranda</a></li>
+                    <li><a href="explore.html"><i class="fas fa-compass"></i> Explore</a></li>
+                    <li><a href="groups.html"><i class="fas fa-users"></i> Grup</a></li>
+                    <li class="separator"></li>
+                    <li><a href="service-center.html"><i class="fas fa-headset"></i> Service Center</a></li>
+                    <li><a href="donate.html"><i class="fas fa-heart"></i> Donasi</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-profile">
+                <a href="profile.html"><img src="https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P" alt="Profil Pengguna" id="sidebarUserAvatar"></a>
+                <div class="profile-info">
+                    <a href="profile.html"><strong id="sidebarUsername">Loading...</strong></a>
+                    <span class="user-email" id="loggedInEmailSidebar">Loading...</span>
+                </div>
+                <a href="#" class="logout-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <button class="back-button-mobile" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+                <h1>Buat Postingan</h1>
+                <div class="header-actions">
+                    <button class="profile-icon-mobile-header" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i></button>
+                </div>
+            </header>
+
+            <section class="create-post-section">
+                <div class="create-post-card card-style">
+                    <h3>Bagikan Momen Anda!</h3>
+                    <form id="createPostForm">
+                        <div class="input-group">
+                            <label for="postText">Apa yang sedang Anda pikirkan?</label>
+                            <textarea id="postText" placeholder="Tuliskan isi postingan Anda di sini..." rows="5"></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="postImage">Unggah Gambar (Opsional)</label>
+                            <input type="file" id="postImage" accept="image/*">
+                            <div class="image-preview" id="imagePreview">
+                                <img src="" alt="Image Preview" style="display: none;">
+                                <span class="no-image-selected">Tidak ada gambar dipilih</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="postCaption">Caption / Tagar (Opsional)</label>
+                            <input type="text" id="postCaption" placeholder="Tambahkan caption atau tagar...">
+                        </div>
+                        <p class="error-message" id="postError"></p>
+                        <button type="submit" class="button-primary-submit" id="submitPostBtn">Posting</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span class="nav-text">Beranda</span></a>
+            <a href="explore.html" class="nav-item"><i class="fas fa-compass"></i><span class="nav-text">Explore</span></a>
+            <a href="groups.html" class="nav-item"><i class="fas fa-users"></i><span class="nav-text">Grup</span></a>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { auth, signOut, onAuthStateChanged, db, collection, addDoc, serverTimestamp, storage, ref, uploadBytes, getDownloadURL, doc, getDoc, updateDoc } from './firebase-config.js';
+
+        let currentUserId = null;
+        let currentUserData = null; // To store username and avatar for posts
+
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUserId = user.uid;
+                    console.log("User logged in:", user.uid);
+                    await loadUserProfileSidebar(user.uid);
+                    // Fetch user data to include in new posts
+                    const userDocRef = doc(db, "users", user.uid);
+                    const userDocSnap = await getDoc(userDocRef);
+                    if (userDocSnap.exists()) {
+                        currentUserData = userDocSnap.data();
+                    }
+                } else {
+                    console.log("No user logged in. Redirecting to index.html");
+                    window.location.href = 'index.html';
+                }
+            });
+
+            async function loadUserProfileSidebar(uid) {
+                const userDocRef = doc(db, "users", uid);
+                try {
+                    const userDocSnap = await getDoc(userDocRef);
+                    if (userDocSnap.exists()) {
+                        const userData = userDocSnap.data();
+                        document.getElementById('sidebarUsername').textContent = userData.username || 'Pengguna 9Gaul';
+                        document.getElementById('loggedInEmailSidebar').textContent = userData.email || auth.currentUser.email;
+                        document.getElementById('sidebarUserAvatar').src = userData.avatarUrl || 'https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P';
+                    } else {
+                        console.warn("User profile not found in Firestore for UID:", uid);
+                        document.getElementById('sidebarUsername').textContent = auth.currentUser.email.split('@')[0];
+                        document.getElementById('loggedInEmailSidebar').textContent = auth.currentUser.email;
+                    }
+                } catch (error) {
+                    console.error("Error loading user profile:", error);
+                    document.getElementById('sidebarUsername').textContent = auth.currentUser.email.split('@')[0];
+                    document.getElementById('loggedInEmailSidebar').textContent = auth.currentUser.email;
+                }
+            }
+
+            // Highlighting the active link (unchanged)
+            const path = window.location.pathname.split('/').pop();
+            document.querySelectorAll('.sidebar-nav a, .bottom-nav .nav-item').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === path) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Image preview logic
+            const postImageInput = document.getElementById('postImage');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImg = imagePreview.querySelector('img');
+            const noImageSelectedSpan = imagePreview.querySelector('.no-image-selected');
+
+            postImageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        previewImg.style.display = 'block';
+                        noImageSelectedSpan.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewImg.src = '';
+                    previewImg.style.display = 'none';
+                    noImageSelectedSpan.style.display = 'block';
+                }
+            });
+
+            // Handle post submission
+            const createPostForm = document.getElementById('createPostForm');
+            const postText = document.getElementById('postText');
+            const postCaption = document.getElementById('postCaption');
+            const postError = document.getElementById('postError');
+            const submitPostBtn = document.getElementById('submitPostBtn');
+
+            createPostForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                postError.textContent = '';
+                submitPostBtn.disabled = true;
+                submitPostBtn.textContent = 'Posting...';
+
+                const text = postText.value.trim();
+                const imageFile = postImageInput.files[0];
+                const caption = postCaption.value.trim();
+
+                if (!text && !imageFile) {
+                    postError.textContent = 'Postingan tidak boleh kosong! Tulis teks atau unggah gambar.';
+                    submitPostBtn.disabled = false;
+                    submitPostBtn.textContent = 'Posting';
+                    return;
+                }
+
+                try {
+                    let imageUrl = null;
+                    if (imageFile) {
+                        const storageRef = ref(storage, `post_images/${currentUserId}/${Date.now()}_${imageFile.name}`);
+                        const snapshot = await uploadBytes(storageRef, imageFile);
+                        imageUrl = await getDownloadURL(snapshot.ref);
+                        console.log("Image uploaded:", imageUrl);
+                    }
+
+                    const newPost = {
+                        userId: currentUserId,
+                        username: currentUserData ? currentUserData.username : auth.currentUser.email.split('@')[0],
+                        userAvatar: currentUserData ? currentUserData.avatarUrl : 'https://via.placeholder.com/30/f0b48a/FFFFFF?text=U',
+                        text: text,
+                        imageUrl: imageUrl,
+                        caption: caption,
+                        createdAt: serverTimestamp(),
+                        votes: 0,
+                        commentsCount: 0,
+                        upvotedBy: [], // Array of UIDs who upvoted
+                        downvotedBy: [] // Array of UIDs who downvoted
+                    };
+
+                    await addDoc(collection(db, "posts"), newPost);
+
+                    // Update user's post count
+                    const userRef = doc(db, "users", currentUserId);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        const currentPostsCount = userSnap.data().postsCount || 0;
+                        await updateDoc(userRef, {
+                            postsCount: currentPostsCount + 1
+                        });
+                    }
+
+                    alert('Postingan berhasil dibuat!');
+                    createPostForm.reset(); // Clear the form
+                    previewImg.src = '';
+                    previewImg.style.display = 'none';
+                    noImageSelectedSpan.style.display = 'block';
+                    window.location.href = 'dashboard.html'; // Redirect to dashboard
+                } catch (error) {
+                    console.error("Error creating post:", error);
+                    postError.textContent = 'Gagal membuat postingan. Coba lagi.';
+                } finally {
+                    submitPostBtn.disabled = false;
+                    submitPostBtn.textContent = 'Posting';
+                }
+            });
+        });
+
+        async function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                try {
+                    await signOut(auth);
+                    localStorage.removeItem('lastLoggedInUserId');
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error("Error logging out:", error);
+                    alert('Gagal logout. Coba lagi.');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

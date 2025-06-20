@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Komentar - 9Gaul</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-laugh-squint"></i> 9Gaul</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-home"></i> Beranda</a></li>
+                    <li><a href="explore.html"><i class="fas fa-compass"></i> Explore</a></li>
+                    <li><a href="groups.html"><i class="fas fa-users"></i> Grup</a></li>
+                    <li class="separator"></li>
+                    <li><a href="service-center.html"><i class="fas fa-headset"></i> Service Center</a></li>
+                    <li><a href="donate.html"><i class="fas fa-heart"></i> Donasi</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-profile">
+                <a href="profile.html"><img src="https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P" alt="Profil Pengguna"></a>
+                <div class="profile-info">
+                    <a href="profile.html"><strong>Pengguna Dummy</strong></a>
+                    <span class="user-email" id="loggedInEmailSidebar"></span>
+                </div>
+                <a href="#" class="logout-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <button class="back-button-mobile" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+                <h1>Komentar</h1>
+                <div class="header-actions">
+                    <button class="profile-icon-mobile-header" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i></button>
+                </div>
+            </header>
+
+            <section class="comment-page-container">
+                <div class="post-card" id="postDetail">
+                    <p class="page-placeholder" style="padding: 20px;" id="postLoadingMessage">Memuat postingan...</p>
+                </div>
+
+                <div class="comment-input-area card-style" id="commentInputSection" style="display: none;">
+                    <img id="currentUserAvatar" src="https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P" alt="Profil Pengguna" class="current-user-avatar">
+                    <textarea id="commentInput" placeholder="Tambahkan komentar Anda..." rows="3"></textarea>
+                    <button id="postCommentButton" class="button-primary-submit">Kirim</button>
+                </div>
+
+                <div class="comments-list-section card-style" id="commentsListSection" style="display: none;">
+                    <h3>Komentar (<span id="totalComments">0</span>)</h3>
+                    <div class="comments-list" id="commentsList">
+                        <p class="page-placeholder" style="padding: 20px;" id="commentsLoadingMessage">Memuat komentar...</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item active"><i class="fas fa-home"></i><span class="nav-text">Beranda</span></a>
+            <a href="explore.html" class="nav-item"><i class="fas fa-compass"></i><span class="nav-text">Explore</span></a>
+            <a href="groups.html" class="nav-item"><i class="fas fa-users"></i><span class="nav-text">Grup</span></a>
+        </nav>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Your Firebase configuration goes here
+        // IMPORTANT: Replace with your actual Firebase project configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let currentPost = null; // Store the fetched post data
+        let currentUserId = null; // Store the current logged-in user's UID
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loggedInEmailSidebar = document.getElementById('loggedInEmailSidebar');
+            const currentUserAvatar = document.getElementById('currentUserAvatar');
+            const postLoadingMessage = document.getElementById('postLoadingMessage');
+            const commentsLoadingMessage = document.getElementById('commentsLoadingMessage');
+            const commentInputSection = document.getElementById('commentInputSection');
+            const commentsListSection = document.getElementById('commentsListSection');
+
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUserId = user.uid;
+                    // Try to get user's display name and avatar from Firestore 'users' collection
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        loggedInEmailSidebar.textContent = userData.email || user.email;
+                        currentUserAvatar.src = userData.avatarUrl || 'https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P';
+                    } else {
+                        loggedInEmailSidebar.textContent = user.email;
+                    }
+                    loadPostAndComments();
+                } else {
+                    console.warn("No user logged in. Redirecting to login page.");
+                    window.location.href = 'index.html';
+                }
+            });
+
+            // Highlighting the active link
+            const path = window.location.pathname.split('/').pop();
+            document.querySelectorAll('.sidebar-nav a, .bottom-nav .nav-item').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === path) {
+                    link.classList.add('active');
+                } else if (path === '' && link.getAttribute('href') === 'dashboard.html') {
+                    link.classList.add('active');
+                }
+            });
+
+            const commentsListContainer = document.getElementById('commentsList');
+            const commentInput = document.getElementById('commentInput');
+            const postCommentButton = document.getElementById('postCommentButton');
+            const totalCommentsSpan = document.getElementById('totalComments');
+            const postCommentCountSpan = document.getElementById('postCommentCount');
+            const postDetailContainer = document.getElementById('postDetail');
+
+            // --- Function to format time difference ---
+            function formatTimeAgo(date) {
+                const seconds = Math.floor((new Date() - date) / 1000);
+                let interval = seconds / 31536000;
+                if (interval > 1) return Math.floor(interval) + " tahun yang lalu";
+                interval = seconds / 2592000;
+                if (interval > 1) return Math.floor(interval) + " bulan yang lalu";
+                interval = seconds / 86400;
+                if (interval > 1) return Math.floor(interval) + " hari yang lalu";
+                interval = seconds / 3600;
+                if (interval > 1) return Math.floor(interval) + " jam yang lalu";
+                interval = seconds / 60;
+                if (interval > 1) return Math.floor(interval) + " menit yang lalu";
+                return Math.floor(seconds) + " detik yang lalu";
+            }
+
+            // --- Function to load post and comments from Firebase ---
+            async function loadPostAndComments() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const postId = urlParams.get('postId');
+
+                if (!postId) {
+                    postDetailContainer.innerHTML = '<p class="page-placeholder" style="padding: 20px;">ID Postingan tidak ditemukan.</p>';
+                    commentInputSection.style.display = 'none';
+                    commentsListSection.style.display = 'none';
+                    return;
+                }
+
+                postLoadingMessage.style.display = 'block';
+                commentsLoadingMessage.style.display = 'block';
+                commentInputSection.style.display = 'none';
+                commentsListSection.style.display = 'none';
+
+                try {
+                    // Fetch Post Details
+                    const postDoc = await db.collection('posts').doc(postId).get();
+                    if (postDoc.exists) {
+                        currentPost = { id: postDoc.id, ...postDoc.data() };
+
+                        // Fetch post author's details
+                        const authorDoc = await db.collection('users').doc(currentPost.userId).get();
+                        const authorData = authorDoc.exists ? authorDoc.data() : { displayName: 'Pengguna Tidak Dikenal', avatarUrl: 'https://via.placeholder.com/30/cccccc/FFFFFF?text=U' };
+
+                        document.title = `Komentar - ${authorData.displayName || 'Post'} - 9Gaul`;
+                        postDetailContainer.innerHTML = `
+                            <div class="post-header">
+                                <img id="postUserAvatar" src="${authorData.avatarUrl || 'https://via.placeholder.com/30/f0b48a/FFFFFF?text=U'}" alt="Profil">
+                                <div class="post-info">
+                                    <strong id="postUserName">${authorData.displayName || 'Pengguna Tidak Dikenal'}</strong>
+                                    <span id="postTime">${currentPost.timestamp ? formatTimeAgo(currentPost.timestamp.toDate()) : 'Waktu Tidak Diketahui'}</span>
+                                </div>
+                            </div>
+                            ${currentPost.imageUrl ? `<img id="postImage" src="${currentPost.imageUrl}" alt="Post Foto" class="post-image">` : '<img id="postImage" src="" alt="Post Foto" class="post-image" style="display: none;">'}
+                            <p class="post-text" id="postText">${currentPost.text || ''}</p>
+                            <div class="post-actions">
+                                <button class="vote-button upvote" data-post-id="${currentPost.id}"><i class="fas fa-arrow-up"></i></button>
+                                <span class="vote-count" id="postVoteCount">${currentPost.votes || 0}</span>
+                                <button class="vote-button downvote" data-post-id="${currentPost.id}"><i class="fas fa-arrow-down"></i></button>
+                                <button class="comment-button-disabled"><i class="fas fa-comment"></i> <span id="postCommentCount">${currentPost.commentCount || 0}</span></button>
+                                <button class="share-button"><i class="fas fa-share-alt"></i></button>
+                            </div>
+                            <p class="post-caption" id="postCaption">${currentPost.caption || ''}</p>
+                        `;
+
+                        // Attach event listeners to the new vote buttons
+                        attachVoteButtonListeners();
+
+                        // Fetch Comments
+                        const commentsSnapshot = await db.collection('posts').doc(postId).collection('comments').orderBy('timestamp', 'asc').get();
+                        commentsListContainer.innerHTML = ''; // Clear previous comments
+
+                        if (commentsSnapshot.empty) {
+                            commentsListContainer.innerHTML = '<p class="no-comments-message">Belum ada komentar. Jadilah yang pertama!</p>';
+                            totalCommentsSpan.textContent = '0';
+                        } else {
+                            commentsSnapshot.docs.forEach(async commentDoc => {
+                                const commentData = commentDoc.data();
+                                const commentItem = document.createElement('div');
+                                commentItem.classList.add('comment-item');
+
+                                // Fetch comment author's details
+                                const commentAuthorDoc = await db.collection('users').doc(commentData.userId).get();
+                                const commentAuthorData = commentAuthorDoc.exists ? commentAuthorDoc.data() : { displayName: 'Pengguna Tidak Dikenal', avatarUrl: 'https://via.placeholder.com/35/cccccc/FFFFFF?text=U' };
+
+                                commentItem.innerHTML = `
+                                    <img src="${commentAuthorData.avatarUrl || 'https://via.placeholder.com/35/d35f5f/FFFFFF?text=X'}" alt="User Avatar">
+                                    <div class="comment-content">
+                                        <strong>${commentAuthorData.displayName || 'Pengguna Tidak Dikenal'}</strong>
+                                        <span class="comment-time">${commentData.timestamp ? formatTimeAgo(commentData.timestamp.toDate()) : 'Waktu Tidak Diketahui'}</span>
+                                        <p>${commentData.text}</p>
+                                    </div>
+                                `;
+                                commentsListContainer.appendChild(commentItem);
+                            });
+                            totalCommentsSpan.textContent = commentsSnapshot.docs.length;
+                            postCommentCountSpan.textContent = commentsSnapshot.docs.length; // Ensure post comment count is accurate
+                        }
+
+                        postLoadingMessage.style.display = 'none';
+                        commentsLoadingMessage.style.display = 'none';
+                        commentInputSection.style.display = 'flex'; // Show comment input after post loads
+                        commentsListSection.style.display = 'block'; // Show comments section
+                    } else {
+                        postDetailContainer.innerHTML = '<p class="page-placeholder" style="padding: 20px;">Maaf, postingan tidak ditemukan.</p>';
+                        commentInputSection.style.display = 'none';
+                        commentsListSection.style.display = 'none';
+                        postLoadingMessage.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error("Error loading post or comments:", error);
+                    postDetailContainer.innerHTML = '<p class="page-placeholder" style="padding: 20px;">Gagal memuat postingan. Silakan coba lagi.</p>';
+                    postLoadingMessage.style.display = 'none';
+                    commentsLoadingMessage.style.display = 'none';
+                    commentInputSection.style.display = 'none';
+                    commentsListSection.style.display = 'none';
+                }
+            }
+
+            // --- Logic for posting a new comment ---
+            postCommentButton.addEventListener('click', async () => {
+                const commentText = commentInput.value.trim();
+                if (!commentText) {
+                    alert('Komentar tidak boleh kosong!');
+                    return;
+                }
+
+                if (!currentPost || !currentUserId) {
+                    alert('Tidak dapat menambahkan komentar. Postingan tidak dimuat atau pengguna tidak login.');
+                    return;
+                }
+
+                postCommentButton.disabled = true; // Disable button to prevent double-submission
+                commentInput.disabled = true;
+
+                try {
+                    // Get current user's display name and avatar for the comment
+                    const userDoc = await db.collection('users').doc(currentUserId).get();
+                    const userData = userDoc.exists ? userDoc.data() : { displayName: 'Pengguna', avatarUrl: 'https://via.placeholder.com/35/8ab4f8/FFFFFF?text=P' };
+
+                    const newCommentRef = await db.collection('posts').doc(currentPost.id).collection('comments').add({
+                        userId: currentUserId,
+                        userName: userData.displayName || 'Pengguna',
+                        userAvatar: userData.avatarUrl || 'https://via.placeholder.com/35/8ab4f8/FFFFFF?text=P',
+                        text: commentText,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp() // Use server timestamp
+                    });
+
+                    // Update comment count on the post
+                    await db.collection('posts').doc(currentPost.id).update({
+                        commentCount: firebase.firestore.FieldValue.increment(1)
+                    });
+
+                    // Render new comment immediately
+                    const commentItem = document.createElement('div');
+                    commentItem.classList.add('comment-item');
+                    commentItem.innerHTML = `
+                        <img src="${userData.avatarUrl || 'https://via.placeholder.com/35/8ab4f8/FFFFFF?text=P'}" alt="User Avatar">
+                        <div class="comment-content">
+                            <strong>${userData.displayName || 'Pengguna'}</strong>
+                            <span class="comment-time">Baru saja</span>
+                            <p>${commentText}</p>
+                        </div>
+                    `;
+                    // Prepend new comment to the list (most recent at top)
+                    const noCommentsMessage = commentsListContainer.querySelector('.no-comments-message');
+                    if (noCommentsMessage) {
+                        noCommentsMessage.remove(); // Remove "No comments" message if present
+                    }
+                    commentsListContainer.prepend(commentItem);
+
+                    // Update comment counts in UI
+                    totalCommentsSpan.textContent = parseInt(totalCommentsSpan.textContent) + 1;
+                    postCommentCountSpan.textContent = parseInt(postCommentCountSpan.textContent) + 1;
+
+                    commentInput.value = ''; // Clear input
+                    alert('Komentar berhasil ditambahkan!');
+
+                } catch (error) {
+                    console.error("Error adding comment:", error);
+                    alert('Gagal menambahkan komentar. Silakan coba lagi.');
+                } finally {
+                    postCommentButton.disabled = false;
+                    commentInput.disabled = false;
+                }
+            });
+
+            // --- Dummy Vote Button Logic updated for Firebase (simulated for comments page) ---
+            function attachVoteButtonListeners() {
+                document.querySelectorAll('.post-actions .vote-button').forEach(button => {
+                    button.onclick = async function() { // Use onclick to re-attach after element recreation
+                        const postId = this.dataset.postId;
+                        const isUpvote = this.classList.contains('upvote');
+                        const voteCountSpan = this.parentElement.querySelector('.vote-count');
+                        let currentVotes = parseInt(voteCountSpan.textContent);
+
+                        if (!currentUserId || !postId) {
+                            alert("Anda harus login untuk memilih.");
+                            return;
+                        }
+
+                        // Simulate active state locally for immediate feedback
+                        let voteChange = 0;
+                        if (this.classList.contains('active')) {
+                            // User is deactivating their vote
+                            this.classList.remove('active');
+                            voteChange = isUpvote ? -1 : 1; // Decrement for up, increment for down
+                        } else {
+                            // User is activating a vote
+                            // Check if the opposite button is active and deactivate it
+                            this.parentElement.querySelectorAll('.vote-button').forEach(btn => {
+                                if (btn !== this && btn.classList.contains('active')) {
+                                    btn.classList.remove('active');
+                                    voteChange += btn.classList.contains('upvote') ? -1 : 1; // Adjust count if opposite was active
+                                }
+                            });
+                            this.classList.add('active');
+                            voteChange += isUpvote ? 1 : -1; // Increment for up, decrement for down
+                        }
+
+                        currentVotes += voteChange;
+                        voteCountSpan.textContent = currentVotes;
+
+                        // Now, update Firestore
+                        try {
+                            const postRef = db.collection('posts').doc(postId);
+                            await postRef.update({
+                                votes: firebase.firestore.FieldValue.increment(voteChange)
+                            });
+                            // In a real app, you'd also track which user voted on which post
+                            // e.g., in a 'userVotes' subcollection or map in the post document.
+                            console.log(`Vote updated for post ${postId}. New votes: ${currentVotes}`);
+                        } catch (error) {
+                            console.error("Error updating vote:", error);
+                            alert("Gagal memperbarui vote. Silakan coba lagi.");
+                            // Revert UI changes if Firestore update fails
+                            voteCountSpan.textContent = currentVotes - voteChange; // revert count
+                            this.classList.toggle('active'); // revert active state
+                            // If an opposite button was deactivated, reactivate it (complex state management needed for full robustness)
+                        }
+                    };
+                });
+            }
+            // No need to call attachVoteButtonListeners here, it's called after post load.
+        });
+
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                auth.signOut().then(() => {
+                    localStorage.removeItem('lastRegisteredDummyEmail'); // Clear dummy email
+                    window.location.href = 'index.html';
+                }).catch((error) => {
+                    console.error("Error logging out:", error);
+                    alert("Terjadi kesalahan saat logout. Silakan coba lagi.");
+                });
+            }
+        }
+    </script>
+</body>
+</html>

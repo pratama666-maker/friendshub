@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Pengguna - 9Gaul</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header"><h2><i class="fas fa-laugh-squint"></i> 9Gaul</h2></div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-home"></i> Beranda</a></li>
+                    <li><a href="explore.html"><i class="fas fa-compass"></i> Explore</a></li>
+                    <li><a href="groups.html"><i class="fas fa-users"></i> Grup</a></li>
+                    <li class="separator"></li>
+                    <li><a href="service-center.html"><i class="fas fa-headset"></i> Service Center</a></li>
+                    <li><a href="donate.html"><i class="fas fa-heart"></i> Donasi</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-profile">
+                <a href="profile.html"><img src="https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P" alt="Profil Pengguna" id="sidebarUserAvatar"></a>
+                <div class="profile-info">
+                    <a href="profile.html"><strong id="sidebarUsername">Loading...</strong></a>
+                    <span class="user-email" id="loggedInEmailSidebar">Loading...</span>
+                </div>
+                <a href="#" class="logout-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <button class="back-button-mobile" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+                <h1>Profil</h1>
+                <div class="header-actions">
+                    <button class="settings-button" onclick="window.location.href='settings.html'"><i class="fas fa-cog"></i></button>
+                    <button class="profile-icon-mobile-header active" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i></button>
+                </div>
+            </header>
+
+            <section class="profile-section">
+                <div class="profile-header-card card-style">
+                    <div class="profile-cover">
+                        <img src="https://via.placeholder.com/800x200/5A6B7D/FFFFFF?text=Cover+Profil" alt="Cover Profil" id="profileCoverImage">
+                    </div>
+                    <div class="profile-info-main">
+                        <img src="https://via.placeholder.com/120/8ab4f8/FFFFFF?text=P" alt="Foto Profil" class="profile-avatar" id="profileAvatarImage">
+                        <div class="profile-details">
+                            <h2 id="profileDisplayName">Loading...</h2>
+                            <p class="profile-username" id="profileUsername">@loading</p>
+                            <p class="profile-bio" id="profileBio">Loading bio...</p>
+                            <div class="profile-stats">
+                                <span><strong id="followersCount">0</strong> Pengikut</span>
+                                <span><strong id="followingCount">0</strong> Mengikuti</span>
+                                <span><strong id="postsCount">0</strong> Postingan</span>
+                            </div>
+                            <div class="profile-actions">
+                                <button class="button-primary-outline" onclick="editProfile()">Edit Profil</button>
+                                <button class="button-secondary" onclick="shareProfile()"><i class="fas fa-share-alt"></i> Bagikan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            
+
+                <div class="profile-tabs">
+                    <button class="tab-button active" data-tab="posts">Postingan</button>
+                    <button class="tab-button" data-tab="media">Media</button>
+                    <button class="tab-button" data-tab="groups">Grup</button>
+                </div>
+
+                <div class="profile-content-area" id="profileContentArea">
+                    <div id="postsTab" class="tab-content active">
+                        <p class="loading-message">Memuat postingan...</p>
+                        <p class="no-content-message" style="display: none;">Belum ada postingan di sini.</p>
+                    </div>
+
+                    <div id="mediaTab" class="tab-content">
+                        <div class="media-grid">
+                            </div>
+                        <p class="no-content-message" style="display: none;">Belum ada media yang diunggah.</p>
+                    </div>
+
+                    <div id="groupsTab" class="tab-content">
+                        <div class="group-list">
+                            </div>
+                        <p class="no-content-message" style="display: none;">Belum bergabung dengan grup apapun.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span class="nav-text">Beranda</span></a>
+            <a href="explore.html" class="nav-item"><i class="fas fa-compass"></i><span class="nav-text">Explore</span></a>
+            <a href="groups.html" class="nav-item"><i class="fas fa-users"></i><span class="nav-text">Grup</span></a>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { auth, signOut, onAuthStateChanged, db, collection, getDocs, query, orderBy, where, doc, getDoc, updateDoc } from './firebase-config.js';
+
+        let currentUserId = null; // Store the UID of the logged-in user
+
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUserId = user.uid;
+                    console.log("User logged in:", user.uid);
+                    await loadUserProfile(user.uid);
+                    await loadUserPosts(user.uid);
+                    // Tambahkan loadUserMedia, loadUserGroups jika ada
+                } else {
+                    console.log("No user logged in. Redirecting to index.html");
+                    window.location.href = 'index.html';
+                }
+            });
+
+            async function loadUserProfile(uid) {
+                const userDocRef = doc(db, "users", uid);
+                try {
+                    const userDocSnap = await getDoc(userDocRef);
+                    if (userDocSnap.exists()) {
+                        const userData = userDocSnap.data();
+                        document.getElementById('sidebarUsername').textContent = userData.username || 'Pengguna 9Gaul';
+                        document.getElementById('loggedInEmailSidebar').textContent = userData.email || auth.currentUser.email;
+                        document.getElementById('sidebarUserAvatar').src = userData.avatarUrl || 'https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P';
+
+                        // Update profile details on the main page
+                        document.getElementById('profileCoverImage').src = userData.coverUrl || 'https://via.placeholder.com/800x200/5A6B7D/FFFFFF?text=Cover+Profil';
+                        document.getElementById('profileAvatarImage').src = userData.avatarUrl || 'https://via.placeholder.com/120/8ab4f8/FFFFFF?text=P';
+                        document.getElementById('profileDisplayName').textContent = userData.username || 'Pengguna 9Gaul';
+                        document.getElementById('profileUsername').textContent = `@${userData.username || 'pengguna_9gaul'}`;
+                        document.getElementById('profileBio').textContent = userData.bio || 'Belum ada bio.';
+                        document.getElementById('followersCount').textContent = userData.followers || 0;
+                        document.getElementById('followingCount').textContent = userData.following || 0;
+                        document.getElementById('postsCount').textContent = userData.postsCount || 0;
+                        document.getElementById('fansCount').textContent = userData.fansCount || 0; // Assuming fansCount field
+                        document.getElementById('hattersCount').textContent = userData.hattersCount || 0; // Assuming hattersCount field
+
+                    } else {
+                        console.warn("User profile not found in Firestore for UID:", uid);
+                        // Fallback to basic info if profile not found
+                        document.getElementById('sidebarUsername').textContent = auth.currentUser.email.split('@')[0];
+                        document.getElementById('loggedInEmailSidebar').textContent = auth.currentUser.email;
+                    }
+                } catch (error) {
+                    console.error("Error loading user profile:", error);
+                }
+            }
+
+            async function loadUserPosts(uid) {
+                const postsTab = document.getElementById('postsTab');
+                postsTab.innerHTML = '<p class="loading-message">Memuat postingan...</p>';
+                const postsCollectionRef = collection(db, "posts");
+                // Filter posts by the current user's UID
+                const q = query(postsCollectionRef, where("userId", "==", uid), orderBy("createdAt", "desc"));
+
+                try {
+                    const querySnapshot = await getDocs(q);
+                    let postsHtml = '';
+                    if (querySnapshot.empty) {
+                        postsTab.innerHTML = '<p class="no-content-message">Belum ada postingan di sini.</p>';
+                    } else {
+                        querySnapshot.forEach((doc) => {
+                            const post = doc.data();
+                            const postId = doc.id;
+                            postsHtml += `
+                                <div class="post-card" data-post-id="${postId}">
+                                    <div class="post-header">
+                                        <img src="${post.userAvatar || 'https://via.placeholder.com/30/f0b48a/FFFFFF?text=U'}" alt="Profil">
+                                        <div class="post-info">
+                                            <strong>${post.username || 'Pengguna Anonim'}</strong>
+                                            <span>${formatTimestamp(post.createdAt)}</span>
+                                        </div>
+                                        <i class="fas fa-ellipsis-h post-options-icon"></i>
+                                    </div>
+                                    ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Post Foto" class="post-image">` : ''}
+                                    ${post.text ? `<p class="post-text">${post.text}</p>` : ''}
+                                    <div class="post-actions">
+                                        <button class="vote-button upvote ${post.upvotedBy && post.upvotedBy.includes(currentUserId) ? 'active' : ''}" data-action="upvote"><i class="fas fa-arrow-up"></i></button>
+                                        <span class="vote-count">${post.votes || 0}</span>
+                                        <button class="vote-button downvote ${post.downvotedBy && post.downvotedBy.includes(currentUserId) ? 'active' : ''}" data-action="downvote"><i class="fas fa-arrow-down"></i></button>
+                                        <button class="comment-button" data-post-id="${postId}"><i class="fas fa-comment"></i> ${post.commentsCount || 0}</button>
+                                        <button class="share-button"><i class="fas fa-share-alt"></i></button>
+                                    </div>
+                                    ${post.caption ? `<p class="post-caption">${post.caption}</p>` : ''}
+                                </div>
+                            `;
+                        });
+                        postsTab.innerHTML = postsHtml;
+                    }
+                    attachPostEventListeners(); // Attach listeners after posts are loaded
+                } catch (error) {
+                    console.error("Error loading user posts:", error);
+                    postsTab.innerHTML = '<p class="error-message">Gagal memuat postingan. Coba lagi nanti.</p>';
+                }
+            }
+
+            // Helper function to format timestamp (copied from dashboard.js)
+            function formatTimestamp(timestamp) {
+                if (!timestamp) return 'Beberapa waktu lalu';
+                const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMinutes = Math.round(diffMs / (1000 * 60));
+                const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+                const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+                if (diffMinutes < 1) return 'Baru saja';
+                if (diffMinutes < 60) return `${diffMinutes} menit yang lalu`;
+                if (diffHours < 24) return `${diffHours} jam yang lalu`;
+                if (diffDays < 7) return `${diffDays} hari yang lalu`;
+                return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            }
+
+            // Function to attach event listeners (copied from dashboard.js, needed for posts in profile)
+            function attachPostEventListeners() {
+                document.querySelectorAll('.comment-button').forEach(button => {
+                    button.removeEventListener('click', handleCommentClick);
+                    button.addEventListener('click', handleCommentClick);
+                });
+                document.querySelectorAll('.vote-button').forEach(button => {
+                    button.removeEventListener('click', handleVoteClick);
+                    button.addEventListener('click', handleVoteClick);
+                });
+            }
+
+            async function handleCommentClick() {
+                const postId = this.dataset.postId;
+                window.location.href = `view-comment.html?postId=${postId}`;
+            }
+
+            async function handleVoteClick(event) {
+                if (!currentUserId) {
+                    alert('Anda harus login untuk melakukan vote.');
+                    return;
+                }
+                const button = event.currentTarget;
+                const postId = button.closest('.post-card').dataset.postId;
+                const action = button.dataset.action;
+                const voteCountSpan = button.parentElement.querySelector('.vote-count');
+                const upvoteButton = button.parentElement.querySelector('.upvote');
+                const downvoteButton = button.parentElement.querySelector('.downvote');
+                const postRef = doc(db, "posts", postId);
+
+                try {
+                    const postSnap = await getDoc(postRef);
+                    if (postSnap.exists()) {
+                        const postData = postSnap.data();
+                        let currentVotes = postData.votes || 0;
+                        let upvotedBy = postData.upvotedBy || [];
+                        let downvotedBy = postData.downvotedBy || [];
+
+                        const isCurrentlyUpvoted = upvotedBy.includes(currentUserId);
+                        const isCurrentlyDownvoted = downvotedBy.includes(currentUserId);
+
+                        if (action === 'upvote') {
+                            if (isCurrentlyUpvoted) {
+                                upvotedBy = upvotedBy.filter(uid => uid !== currentUserId);
+                                currentVotes--;
+                            } else {
+                                upvotedBy.push(currentUserId);
+                                currentVotes++;
+                                if (isCurrentlyDownvoted) {
+                                    downvotedBy = downvotedBy.filter(uid => uid !== currentUserId);
+                                    currentVotes++;
+                                }
+                            }
+                        } else if (action === 'downvote') {
+                            if (isCurrentlyDownvoted) {
+                                downvotedBy = downvotedBy.filter(uid => uid !== currentUserId);
+                                currentVotes++;
+                            } else {
+                                downvotedBy.push(currentUserId);
+                                currentVotes--;
+                                if (isCurrentlyUpvoted) {
+                                    upvotedBy = upvotedBy.filter(uid => uid !== currentUserId);
+                                    currentVotes--;
+                                }
+                            }
+                        }
+                        await updateDoc(postRef, {
+                            votes: currentVotes,
+                            upvotedBy: upvotedBy,
+                            downvotedBy: downvotedBy
+                        });
+
+                        voteCountSpan.textContent = currentVotes;
+                        upvoteButton.classList.toggle('active', upvotedBy.includes(currentUserId));
+                        downvoteButton.classList.toggle('active', downvotedBy.includes(currentUserId));
+                    } else {
+                        console.warn("Post not found:", postId);
+                    }
+                } catch (error) {
+                    console.error("Error updating vote:", error);
+                    alert('Gagal melakukan vote. Coba lagi.');
+                }
+            }
+
+            // Tab functionality (unchanged from previous version)
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            function showTab(tabId) {
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                tabButtons.forEach(button => {
+                    button.classList.remove('active');
+                });
+
+                document.getElementById(tabId).classList.add('active');
+                document.querySelector(`.tab-button[data-tab="${tabId.replace('Tab', '')}"]`).classList.add('active');
+
+                const currentTabContent = document.getElementById(tabId);
+                const hasContent = currentTabContent.children.length > 1; // More than just the hidden message
+                const noContentMessage = currentTabContent.querySelector('.no-content-message');
+                if (noContentMessage) {
+                    noContentMessage.style.display = hasContent ? 'none' : 'block';
+                }
+            }
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab + 'Tab';
+                    showTab(tabId);
+                });
+            });
+
+            // Show default tab on load (after user data is loaded)
+            showTab('postsTab'); // This will trigger loadUserPosts initially
+
+            // Highlight active links (sidebar and bottom nav)
+            const path = window.location.pathname.split('/').pop();
+            document.querySelectorAll('.sidebar-nav a, .bottom-nav .nav-item').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === path) {
+                    link.classList.add('active');
+                }
+            });
+            const profileButtonHeader = document.querySelector('.header-actions button.profile-icon-mobile-header');
+            if (profileButtonHeader && path === 'profile.html') {
+                profileButtonHeader.classList.add('active');
+            }
+
+
+            // Dummy functions for profile actions
+            window.editProfile = function() {
+                alert('Fungsi Edit Profil akan datang! Data akan disimpan di Firestore.');
+                // Redirect to edit profile page (e.g., window.location.href = 'edit-profile.html';)
+            };
+
+            window.shareProfile = function() {
+                alert('Fungsi Bagikan Profil akan datang!');
+                // Implement Web Share API or custom share dialog
+            };
+
+            window.viewFans = function() {
+                alert('Melihat daftar Fans Anda! (Fungsi akan datang, data dari Firestore)');
+                // In a real app, this would open a modal or navigate to a list page
+            };
+
+            window.viewHatters = function() {
+                alert('Melihat daftar Hatters Anda! (Fungsi akan datang, data dari Firestore) Hati-hati ya!');
+                // In a real app, this would open a modal or navigate to a list page
+            };
+        });
+
+        async function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                try {
+                    await signOut(auth);
+                    localStorage.removeItem('lastLoggedInUserId');
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error("Error logging out:", error);
+                    alert('Gagal logout. Coba lagi.');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

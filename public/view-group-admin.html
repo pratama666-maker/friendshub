@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin: Nama Grup - 9Gaul</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    </head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header"><h2><i class="fas fa-laugh-squint"></i> 9Gaul</h2></div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-home"></i> Beranda</a></li>
+                    <li><a href="explore.html"><i class="fas fa-compass"></i> Explore</a></li>
+                    <li><a href="groups.html" class="active"><i class="fas fa-users"></i> Grup</a></li>
+                    <li class="separator"></li>
+                    <li><a href="service-center.html"><i class="fas fa-headset"></i> Service Center</a></li>
+                    <li><a href="donate.html"><i class="fas fa-heart"></i> Donasi</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-profile">
+                <a href="profile.html"><img src="https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P" alt="Profil Pengguna" id="sidebarUserAvatar"></a>
+                <div class="profile-info">
+                    <a href="profile.html"><strong id="sidebarUsername">Loading...</strong></a>
+                    <span class="user-email" id="loggedInEmailSidebar">Loading...</span>
+                </div>
+                <a href="#" class="logout-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <button class="back-button-mobile" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+                <h1>Admin: <span id="groupNameAdminHeader">Memuat...</span></h1>
+                <div class="header-actions">
+                    <button class="edit-group-btn" id="editGroupButton" style="display: none;" onclick="alert('Fitur edit grup akan datang!')"><i class="fas fa-cog"></i></button>
+                    <button class="profile-icon-mobile-header" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i></button>
+                </div>
+            </header>
+
+            <section class="group-detail-container" id="groupAdminContent">
+                <p id="loadingMessage" style="text-align: center; color: var(--sub-text-color); margin-top: 50px;">Memuat data grup...</p>
+                <p id="accessDeniedMessage" class="message-error" style="display: none; text-align: center; margin-top: 50px;">Anda tidak memiliki izin untuk melihat halaman admin grup ini atau grup tidak ditemukan.</p>
+                
+                <div id="groupContentWrapper" style="display: none;">
+                    <div class="group-hero">
+                        <img id="groupBannerAdmin" src="https://via.placeholder.com/800x200/202020/61dafb?text=Banner+Grup" alt="Group Banner">
+                        <div class="group-info-overlay">
+                            <img id="groupAvatarAdmin" src="https://via.placeholder.com/100/FF5700/FFFFFF?text=G" alt="Group Avatar">
+                            <div>
+                                <h2 id="groupNameAdmin"></h2>
+                                <p id="groupMembersAdmin"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="group-actions">
+                        <button class="share-button-group" onclick="alert('Fitur statistik grup akan datang!')"><i class="fas fa-chart-bar"></i> Statistik Grup</button>
+                        <button class="more-options-group" onclick="alert('Fitur pengaturan lanjut akan datang!')"><i class="fas fa-cogs"></i> Pengaturan Lanjut</button>
+                    </div>
+
+                    <div class="group-description card-style">
+                        <h3>Tentang Grup Ini</h3>
+                        <p id="groupDescriptionAdmin"></p>
+                    </div>
+
+                    <div class="group-members-section card-style">
+                        <h3>Anggota Grup (<span id="membersCount">0</span>)</h3>
+                        <div class="member-list" id="memberList">
+                            <p style="text-align: center; color: var(--sub-text-color);">Memuat anggota...</p>
+                        </div>
+                    </div>
+
+                    <div class="group-posts-section">
+                        <h3>Postingan Grup</h3>
+                        <div class="post-feed" id="groupPostsFeed">
+                            <p style="text-align: center; color: var(--sub-text-color);">Memuat postingan grup...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span class="nav-text">Beranda</span></a>
+            <a href="explore.html" class="nav-item"><i class="fas fa-compass"></i><span class="nav-text">Explore</span></a>
+            <a href="groups.html" class="nav-item active"><i class="fas fa-users"></i><span class="nav-text">Grup</span></a>
+        </nav>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules dari firebase-config.js
+        import { auth, signOut, onAuthStateChanged, db, collection, getDoc, doc, query, where, orderBy, getDocs, updateDoc, arrayRemove } from './firebase-config.js';
+
+        let currentUserId = null; // Untuk menyimpan UID pengguna yang sedang login
+        let currentGroupId = null; // Untuk menyimpan ID grup yang sedang dilihat
+        let groupData = null; // Untuk menyimpan data grup
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Highlighting the active link
+            const path = window.location.pathname.split('/').pop();
+            document.querySelectorAll('.sidebar-nav a, .bottom-nav .nav-item').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === path) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Get group ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            currentGroupId = urlParams.get('id');
+
+            if (!currentGroupId) {
+                displayAccessDenied("ID Grup tidak ditemukan di URL.");
+                return;
+            }
+
+            // Cek status autentikasi Firebase
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUserId = user.uid;
+                    console.log("User logged in:", user.uid);
+                    await loadUserProfileSidebar(user.uid);
+                    await loadGroupAdminPage(currentGroupId, user.uid);
+                } else {
+                    console.log("No user logged in. Redirecting to index.html");
+                    window.location.href = 'index.html'; // Redirect jika belum login
+                }
+            });
+
+            // Event listener untuk tombol aksi anggota (promosikan/keluarkan)
+            document.getElementById('memberList').addEventListener('click', async (event) => {
+                const target = event.target.closest('button');
+                if (!target) return;
+
+                const memberId = target.dataset.memberId;
+                if (!memberId) return;
+
+                if (target.classList.contains('promote-button')) {
+                    await handlePromoteMember(memberId);
+                } else if (target.classList.contains('remove-button')) {
+                    await handleRemoveMember(memberId);
+                }
+            });
+
+            // Event listener untuk tombol vote (sama seperti dashboard/view-group)
+            document.getElementById('groupPostsFeed').addEventListener('click', function(event) {
+                const button = event.target.closest('.vote-button');
+                if (!button) return;
+
+                const isUpvote = button.classList.contains('upvote');
+                const voteCountSpan = button.parentElement.querySelector('.vote-count');
+                let currentVotes = parseInt(voteCountSpan.textContent);
+
+                if (button.classList.contains('active')) {
+                    button.classList.remove('active');
+                    if (isUpvote) {
+                        currentVotes--;
+                    } else {
+                        currentVotes++;
+                    }
+                } else {
+                    button.classList.add('active');
+                    const otherButton = isUpvote ? button.nextElementSibling.nextElementSibling : button.previousElementSibling.previousElementSibling;
+                    if (otherButton && otherButton.classList.contains('active')) {
+                        otherButton.classList.remove('active');
+                        if (isUpvote) {
+                            currentVotes++;
+                        } else {
+                            currentVotes--;
+                        }
+                    }
+                    if (isUpvote) {
+                        currentVotes++;
+                    } else {
+                        currentVotes--;
+                    }
+                }
+                voteCountSpan.textContent = currentVotes;
+                // TODO: Simpan perubahan vote ke Firestore
+            });
+        });
+
+        // --- Fungsi Logout ---
+        async function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                try {
+                    await signOut(auth);
+                    localStorage.removeItem('lastLoggedInUserId'); // Jika Anda menggunakannya
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error("Error logging out:", error);
+                    alert('Gagal logout. Coba lagi.');
+                }
+            }
+        }
+
+        // --- Fungsi untuk memuat profil pengguna dari Firestore untuk sidebar ---
+        async function loadUserProfileSidebar(uid) {
+            const userDocRef = doc(db, "users", uid);
+            try {
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    document.getElementById('sidebarUsername').textContent = userData.username || 'Pengguna 9Gaul';
+                    document.getElementById('loggedInEmailSidebar').textContent = userData.email || auth.currentUser.email;
+                    document.getElementById('sidebarUserAvatar').src = userData.avatarUrl || 'https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P';
+                } else {
+                    console.warn("User profile not found in Firestore for UID:", uid);
+                    document.getElementById('sidebarUsername').textContent = auth.currentUser.email.split('@')[0];
+                    document.getElementById('loggedInEmailSidebar').textContent = auth.currentUser.email;
+                }
+            } catch (error) {
+                console.error("Error loading user profile:", error);
+                document.getElementById('sidebarUsername').textContent = auth.currentUser.email.split('@')[0];
+                document.getElementById('loggedInEmailSidebar').textContent = auth.currentUser.email;
+            }
+        }
+
+        // --- Fungsi Utama untuk Memuat Halaman Admin Grup ---
+        async function loadGroupAdminPage(groupId, userId) {
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('groupContentWrapper').style.display = 'none';
+            document.getElementById('accessDeniedMessage').style.display = 'none';
+            document.getElementById('editGroupButton').style.display = 'none'; // Sembunyikan tombol edit secara default
+
+            try {
+                const groupDocRef = doc(db, 'groups', groupId);
+                const groupDocSnap = await getDoc(groupDocRef);
+
+                if (!groupDocSnap.exists()) {
+                    displayAccessDenied("Grup tidak ditemukan.");
+                    return;
+                }
+
+                groupData = groupDocSnap.data(); // Simpan data grup secara global
+                
+                // Periksa apakah pengguna saat ini adalah admin grup
+                // Asumsi: 'adminIds' adalah array UID admin di dokumen grup
+                const isAdmin = groupData.adminIds && groupData.adminIds.includes(userId);
+
+                if (!isAdmin) {
+                    displayAccessDenied("Anda tidak memiliki izin admin untuk grup ini.");
+                    return;
+                }
+
+                // Jika pengguna adalah admin, tampilkan konten dan tombol edit
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('groupContentWrapper').style.display = 'block';
+                document.getElementById('editGroupButton').style.display = 'inline-block'; // Tampilkan tombol edit
+
+                document.title = "Admin: " + groupData.name + " - 9Gaul";
+                document.getElementById('groupNameAdminHeader').textContent = groupData.name;
+                document.getElementById('groupNameAdmin').textContent = groupData.name;
+                document.getElementById('groupMembersAdmin').textContent = `${(groupData.membersCount || 0).toLocaleString()} Anggota`;
+                document.getElementById('groupDescriptionAdmin').textContent = groupData.description || 'Tidak ada deskripsi.';
+                document.getElementById('groupAvatarAdmin').src = groupData.iconUrl || 'https://via.placeholder.com/100/CCCCCC/FFFFFF?text=G';
+                document.getElementById('groupBannerAdmin').src = groupData.bannerUrl || 'https://via.placeholder.com/800x200/CCCCCC/202020?text=Banner+Grup';
+                document.getElementById('membersCount').textContent = (groupData.membersCount || 0).toLocaleString();
+
+                await loadGroupMembers(groupId, groupData.members || [], groupData.adminIds || [], groupData.moderatorIds || []);
+                await loadGroupPosts(groupId);
+
+            } catch (error) {
+                console.error("Error loading group admin page:", error);
+                displayAccessDenied("Terjadi kesalahan saat memuat halaman admin grup.");
+            }
+        }
+
+        function displayAccessDenied(message) {
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('groupContentWrapper').style.display = 'none';
+            document.getElementById('accessDeniedMessage').textContent = message;
+            document.getElementById('accessDeniedMessage').style.display = 'block';
+            document.title = "Akses Ditolak - 9Gaul";
+            document.getElementById('groupNameAdminHeader').textContent = "Akses Ditolak";
+        }
+
+        // --- Fungsi untuk Memuat Anggota Grup ---
+        async function loadGroupMembers(groupId, memberUids, adminUids, moderatorUids) {
+            const memberListContainer = document.getElementById('memberList');
+            memberListContainer.innerHTML = '<p style="text-align: center; color: var(--sub-text-color);">Memuat anggota...</p>';
+
+            if (memberUids.length === 0) {
+                memberListContainer.innerHTML = '<p class="page-placeholder" style="padding: 20px;">Belum ada anggota di grup ini.</p>';
+                return;
+            }
+
+            try {
+                // Ambil data profil untuk setiap anggota
+                const memberPromises = memberUids.map(uid => getDoc(doc(db, 'users', uid)));
+                const memberSnapshots = await Promise.all(memberPromises);
+
+                memberListContainer.innerHTML = ''; // Kosongkan loading message
+
+                memberSnapshots.forEach(memberSnap => {
+                    if (memberSnap.exists()) {
+                        const member = memberSnap.data();
+                        const memberId = memberSnap.id;
+                        let role = 'Anggota';
+                        if (adminUids.includes(memberId)) {
+                            role = 'Admin';
+                        } else if (moderatorUids.includes(memberId)) {
+                            role = 'Moderator';
+                        }
+                        
+                        // Jangan tampilkan tombol aksi untuk diri sendiri jika bukan Super Admin
+                        const showActions = (memberId !== currentUserId) && (groupData.createdBy === currentUserId || adminUids.includes(currentUserId));
+                        // Super admin grup (pembuat grup) bisa mengubah peran admin lain
+                        const canPromoteDemoteAdmin = groupData.createdBy === currentUserId;
+
+                        const memberItem = `
+                            <div class="member-item" data-member-id="${memberId}">
+                                <img src="${member.avatarUrl || 'https://via.placeholder.com/40/cccccc/000000?text=U'}" alt="${member.username || 'Pengguna'}">
+                                <div class="member-info">
+                                    <strong>${member.username || member.email.split('@')[0]}</strong>
+                                    <span class="member-role">${role}</span>
+                                </div>
+                                <div class="member-actions">
+                                    ${showActions ? `
+                                        <button class="action-button-small promote-button" title="Ubah Peran" data-member-id="${memberId}" ${!canPromoteDemoteAdmin && role === 'Admin' ? 'disabled' : ''}>
+                                            <i class="fas fa-user-shield"></i>
+                                        </button>
+                                        <button class="action-button-small remove-button" title="Keluarkan Anggota" data-member-id="${memberId}" ${role === 'Admin' && !canPromoteDemoteAdmin ? 'disabled' : ''}>
+                                            <i class="fas fa-user-minus"></i>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+                        memberListContainer.innerHTML += memberItem;
+                    }
+                });
+            } catch (error) {
+                console.error("Error loading group members:", error);
+                memberListContainer.innerHTML = '<p class="message-error" style="text-align: center;">Gagal memuat anggota.</p>';
+            }
+        }
+
+        // --- Fungsi untuk menangani Promosi/Demotion Anggota ---
+        async function handlePromoteMember(memberId) {
+            if (!confirm(`Apakah Anda yakin ingin mengubah peran anggota ini (${memberId})?`)) {
+                return;
+            }
+
+            try {
+                const groupDocRef = doc(db, 'groups', currentGroupId);
+                const groupDocSnap = await getDoc(groupDocRef);
+                const groupData = groupDocSnap.data();
+
+                let adminIds = groupData.adminIds || [];
+                let moderatorIds = groupData.moderatorIds || [];
+                let newRole = '';
+
+                // Logika sederhana: Toggle antara Anggota -> Moderator -> Admin -> Anggota
+                if (adminIds.includes(memberId)) {
+                    // Jika admin, demote ke anggota
+                    adminIds = adminIds.filter(uid => uid !== memberId);
+                    newRole = 'Anggota';
+                } else if (moderatorIds.includes(memberId)) {
+                    // Jika moderator, promote ke admin
+                    moderatorIds = moderatorIds.filter(uid => uid !== memberId);
+                    adminIds.push(memberId);
+                    newRole = 'Admin';
+                } else {
+                    // Jika anggota, promote ke moderator
+                    moderatorIds.push(memberId);
+                    newRole = 'Moderator';
+                }
+                
+                await updateDoc(groupDocRef, {
+                    adminIds: adminIds,
+                    moderatorIds: moderatorIds
+                });
+
+                alert(`Peran anggota ${memberId} berhasil diubah menjadi ${newRole}.`);
+                // Muat ulang anggota untuk memperbarui UI
+                await loadGroupMembers(currentGroupId, groupData.members, adminIds, moderatorIds);
+
+            } catch (error) {
+                console.error("Error promoting/demoting member:", error);
+                alert(`Gagal mengubah peran anggota: ${error.message}`);
+            }
+        }
+
+
+        // --- Fungsi untuk menangani Pengeluaran Anggota ---
+        async function handleRemoveMember(memberId) {
+            if (memberId === currentUserId) {
+                alert("Anda tidak bisa mengeluarkan diri sendiri sebagai admin.");
+                return;
+            }
+            if (memberId === groupData.createdBy && currentUserId !== groupData.createdBy) {
+                alert("Anda tidak bisa mengeluarkan pembuat grup.");
+                return;
+            }
+            if (groupData.adminIds.includes(memberId) && currentUserId !== groupData.createdBy) {
+                 alert("Hanya pembuat grup yang bisa mengeluarkan admin lain.");
+                 return;
+            }
+
+
+            if (!confirm(`Apakah Anda yakin ingin mengeluarkan anggota ini (${memberId}) dari grup?`)) {
+                return;
+            }
+
+            try {
+                const groupDocRef = doc(db, 'groups', currentGroupId);
+                const userDocRef = doc(db, 'users', memberId);
+
+                // Hapus anggota dari array members grup
+                await updateDoc(groupDocRef, {
+                    members: arrayRemove(memberId),
+                    membersCount: (groupData.membersCount || 1) - 1,
+                    adminIds: arrayRemove(memberId), // Pastikan juga dihapus dari admin/moderator jika ada
+                    moderatorIds: arrayRemove(memberId)
+                });
+
+                // Hapus grup dari array joinedGroups pengguna
+                await updateDoc(userDocRef, {
+                    joinedGroups: arrayRemove(currentGroupId)
+                });
+
+                alert(`Anggota ${memberId} berhasil dikeluarkan dari grup.`);
+                // Muat ulang anggota untuk memperbarui UI
+                await loadGroupMembers(currentGroupId, groupData.members.filter(uid => uid !== memberId), groupData.adminIds.filter(uid => uid !== memberId), groupData.moderatorIds.filter(uid => uid !== memberId));
+                // Perbarui hitungan anggota di header
+                document.getElementById('groupMembersAdmin').textContent = `${(groupData.membersCount - 1).toLocaleString()} Anggota`;
+                document.getElementById('membersCount').textContent = (groupData.membersCount - 1).toLocaleString();
+
+            } catch (error) {
+                console.error("Error removing member:", error);
+                alert(`Gagal mengeluarkan anggota: ${error.message}`);
+            }
+        }
+
+        // --- Fungsi untuk Memuat Postingan Grup ---
+        async function loadGroupPosts(groupId) {
+            const postsFeedContainer = document.getElementById('groupPostsFeed');
+            postsFeedContainer.innerHTML = '<p style="text-align: center; color: var(--sub-text-color);">Memuat postingan...</p>';
+
+            try {
+                // Asumsi: Setiap postingan memiliki field 'groupId'
+                const postsCollectionRef = collection(db, 'posts');
+                const q = query(postsCollectionRef, where('groupId', '==', groupId), orderBy('createdAt', 'desc'), limit(10)); // Ambil 10 postingan terbaru
+                const postsSnapshot = await getDocs(q);
+
+                if (postsSnapshot.empty) {
+                    postsFeedContainer.innerHTML = '<p class="page-placeholder" style="padding: 20px;">Belum ada postingan di grup ini.</p>';
+                    return;
+                }
+
+                postsFeedContainer.innerHTML = ''; // Kosongkan loading message
+                for (const postDoc of postsSnapshot.docs) {
+                    const post = postDoc.data();
+                    const postId = postDoc.id;
+
+                    // Ambil data user yang membuat postingan
+                    let postUser = { username: 'Pengguna Tak Dikenal', avatarUrl: 'https://via.placeholder.com/35/cccccc/000000?text=U' };
+                    if (post.userId) {
+                        const userSnap = await getDoc(doc(db, 'users', post.userId));
+                        if (userSnap.exists()) {
+                            postUser = userSnap.data();
+                        }
+                    }
+
+                    const postItem = `
+                        <div class="post-card" data-post-id="${postId}">
+                            <div class="post-header">
+                                <img src="${postUser.avatarUrl || 'https://via.placeholder.com/35/cccccc/000000?text=U'}" alt="${postUser.username || 'User'} Avatar">
+                                <div class="post-info">
+                                    <strong>${postUser.username || postUser.email.split('@')[0]}</strong>
+                                    <span>${formatTimestamp(post.createdAt)}</span>
+                                </div>
+                            </div>
+                            ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Post Image" class="post-image">` : ''}
+                            <p class="post-text">${post.text || ''}</p>
+                            <div class="post-actions">
+                                <button class="vote-button upvote"><i class="fas fa-arrow-up"></i></button>
+                                <span class="vote-count">${post.votes || 0}</span>
+                                <button class="vote-button downvote"><i class="fas fa-arrow-down"></i></button>
+                                <button class="comment-button"><i class="fas fa-comment-alt"></i> ${post.commentCount || 0}</button>
+                                <button class="share-button"><i class="fas fa-share"></i> Bagikan</button>
+                            </div>
+                        </div>
+                    `;
+                    postsFeedContainer.innerHTML += postItem;
+                }
+
+            } catch (error) {
+                console.error("Error loading group posts:", error);
+                postsFeedContainer.innerHTML = '<p class="message-error" style="text-align: center;">Gagal memuat postingan grup.</p>';
+            }
+        }
+
+        // Helper function to format timestamp (reused from dashboard)
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return 'Beberapa waktu lalu';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMinutes = Math.round(diffMs / (1000 * 60));
+            const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+            if (diffMinutes < 1) return 'Baru saja';
+            if (diffMinutes < 60) return `${diffMinutes} menit yang lalu`;
+            if (diffHours < 24) return `${diffHours} jam yang lalu`;
+            if (diffDays < 7) return `${diffDays} hari yang lalu`;
+            return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+    </script>
+</body>
+</html>

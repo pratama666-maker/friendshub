@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daftar - Funhub</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Daftar</h2>
+    <form id="registerForm">
+      <div class="input-group">
+        <label for="registerPassword">Kata Sandi</label>
+        <input type="password" id="registerPassword" required />
+      </div>
+      <div class="input-group">
+        <label for="confirmPassword">Ulangi Kata Sandi</label>
+        <input type="password" id="confirmPassword" required />
+      </div>
+      <button type="submit">Daftar</button>
+    </form>
+    <p>Sudah punya akun? <a href="index.html">Login di sini</a></p>
+    <div class="message-box" id="messageBox"></div>
+  </div>  <script type="module">
+    import {
+      auth,
+      createUserWithEmailAndPassword,
+      onAuthStateChanged,
+      db,
+      doc,
+      setDoc
+    } from './firebase-config.js';
+
+    const registerForm = document.getElementById('registerForm');
+    const messageBox = document.getElementById('messageBox');
+
+    async function hashEmailFromPassword(password) {
+      const msgUint8 = new TextEncoder().encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return `user_${hashHex}@anonlogin.funhub.app`;
+    }
+
+    function showMessage(msg, type = 'info') {
+      messageBox.textContent = msg;
+      messageBox.className = `message-box ${type}`;
+      messageBox.style.display = 'block';
+      setTimeout(() => {
+        messageBox.style.display = 'none';
+      }, 5000);
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = 'dashboard.html';
+      }
+    });
+
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('registerPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        return showMessage('Kata sandi tidak cocok.', 'error');
+      }
+
+      if (password.length < 6) {
+        return showMessage('Minimal 6 karakter.', 'error');
+      }
+
+      const email = await hashEmailFromPassword(password);
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        await setDoc(doc(db, 'users', user.uid), {
+          email,
+          username: email.split('@')[0],
+          avatarUrl: 'https://via.placeholder.com/120/8ab4f8/FFFFFF?text=A',
+          bio: 'Saya pengguna anonim di Funhub.',
+          createdAt: new Date()
+        });
+
+        showMessage('Pendaftaran berhasil! Mengarahkan...', 'success');
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showMessage('Daftar gagal: ' + err.message, 'error');
+      }
+    });
+  </script></body>
+</html>

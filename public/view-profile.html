@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Pengguna - 9Gaul</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header"><h2><i class="fas fa-laugh-squint"></i> 9Gaul</h2></div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-home"></i> Beranda</a></li>
+                    <li><a href="explore.html"><i class="fas fa-compass"></i> Explore</a></li>
+                    <li><a href="groups.html"><i class="fas fa-users"></i> Grup</a></li>
+                    <li class="separator"></li>
+                    <li><a href="service-center.html"><i class="fas fa-headset"></i> Service Center</a></li>
+                    <li><a href="donate.html"><i class="fas fa-heart"></i> Donasi</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-profile">
+                <a href="profile.html"><img src="https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P" alt="Profil Pengguna" id="sidebarUserAvatar"></a>
+                <div class="profile-info">
+                    <a href="profile.html"><strong id="sidebarUsername">Loading...</strong></a>
+                    <span class="user-email" id="loggedInEmailSidebar">Loading...</span>
+                </div>
+                <a href="#" class="logout-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <button class="back-button-mobile" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+                <h1>Profil</h1>
+                <div class="header-actions">
+                    <button class="settings-button" onclick="window.location.href='settings.html'"><i class="fas fa-cog"></i></button>
+                    <button class="profile-icon-mobile-header active" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i></button>
+                </div>
+            </header>
+
+            <section class="profile-section">
+                <p id="loadingMessage" style="text-align: center; color: var(--sub-text-color); margin-top: 50px;">Memuat data profil...</p>
+                <div id="profileContentWrapper" style="display: none;">
+                    <div class="profile-header-card card-style">
+                        <div class="profile-cover">
+                            <img id="profileCoverImage" src="https://via.placeholder.com/800x200/5A6B7D/FFFFFF?text=Cover+Profil" alt="Cover Profil">
+                        </div>
+                        <div class="profile-info-main">
+                            <img id="profileAvatarImage" src="https://via.placeholder.com/120/8ab4f8/FFFFFF?text=P" alt="Foto Profil" class="profile-avatar">
+                            <div class="profile-details">
+                                <h2 id="profileDisplayName"></h2>
+                                <p class="profile-username" id="profileUsername"></p>
+                                <p class="profile-bio" id="profileBio"></p>
+                                <div class="profile-stats">
+                                    <span><strong id="fansCount">0</strong> Fans</span>
+                                    <span><strong id="hatersCount">0</strong> Hatters</span>
+                                    <span><strong id="postsCount">0</strong> Postingan</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-fan-hater-card card-style">
+                        <button class="fans-button" onclick="viewFans()">
+                            <i class="fas fa-star"></i> Fans
+                            <span class="count" id="fansButtonCount">0</span>
+                        </button>
+                        <button class="hatters-button" onclick="viewHatters()">
+                            <i class="fas fa-skull-crossbones"></i> Hatters
+                            <span class="count" id="hatersButtonCount">0</span>
+                        </button>
+                    </div>
+
+                    <div class="profile-tabs">
+                        <button class="tab-button active" data-tab="posts">Postingan</button>
+                        <button class="tab-button" data-tab="media">Media</button>
+                        <button class="tab-button" data-tab="groups">Grup</button>
+                    </div>
+
+                    <div class="profile-content-area" id="profileContentArea">
+                        <div id="postsTab" class="tab-content active">
+                            <p class="no-content-message" style="display: none;">Belum ada postingan di sini.</p>
+                        </div>
+
+                        <div id="mediaTab" class="tab-content">
+                            <div class="media-grid">
+                                </div>
+                            <p class="no-content-message" style="display: none;">Belum ada media yang diunggah.</p>
+                        </div>
+
+                        <div id="groupsTab" class="tab-content">
+                            <div class="group-list">
+                                </div>
+                            <p class="no-content-message" style="display: none;">Belum bergabung dengan grup apapun.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span class="nav-text">Beranda</span></a>
+            <a href="explore.html" class="nav-item"><i class="fas fa-compass"></i><span class="nav-text">Explore</span></a>
+            <a href="groups.html" class="nav-item"><i class="fas fa-users"></i><span class="nav-text">Grup</span></a>
+        </nav>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules dari firebase-config.js
+        import { auth, signOut, onAuthStateChanged, db, collection, getDoc, doc, query, where, orderBy, getDocs, limit } from './firebase-config.js';
+
+        let currentUserId = null; // Untuk menyimpan UID pengguna yang sedang login
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Highlighting the active link
+            const path = window.location.pathname.split('/').pop();
+            document.querySelectorAll('.sidebar-nav a, .bottom-nav .nav-item').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === path) {
+                    link.classList.add('active');
+                }
+            });
+            // Specific highlight for profile icon in header
+            const profileButtonHeader = document.querySelector('.header-actions button.profile-icon-mobile-header');
+            if (profileButtonHeader && path === 'profile.html') {
+                profileButtonHeader.classList.add('active');
+            }
+
+            // Cek status autentikasi Firebase
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUserId = user.uid;
+                    console.log("User logged in:", user.uid);
+                    await loadUserProfile(user.uid);
+                    await loadUserProfileSidebar(user.uid);
+                } else {
+                    console.log("No user logged in. Redirecting to index.html");
+                    window.location.href = 'index.html'; // Redirect jika belum login
+                }
+            });
+
+            // Tab functionality
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab + 'Tab';
+                    showTab(tabId);
+                });
+            });
+
+            // Dummy functions for profile actions (will be enhanced or removed as Firebase features are added)
+            window.editProfile = function() {
+                alert('Fungsi Edit Profil akan datang! Arahkan ke halaman edit-profile.html');
+                // window.location.href = 'edit-profile.html';
+            };
+
+            window.shareProfile = function() {
+                alert('Fungsi Bagikan Profil akan datang!');
+                // Implement Web Share API or custom share dialog
+            };
+
+            window.viewFans = function() {
+                alert('Melihat daftar Fans Anda! (Fungsi akan datang)');
+            };
+
+            window.viewHatters = function() {
+                alert('Melihat daftar Hatters Anda! (Fungsi akan datang) Hati-hati ya!');
+            };
+        });
+
+        // --- Fungsi Logout ---
+        async function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                try {
+                    await signOut(auth);
+                    localStorage.removeItem('lastLoggedInUserId'); // Jika Anda menggunakannya
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error("Error logging out:", error);
+                    alert('Gagal logout. Coba lagi.');
+                }
+            }
+        }
+
+        // --- Fungsi untuk memuat profil pengguna dari Firestore untuk sidebar dan halaman profil ---
+        async function loadUserProfile(uid) {
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('profileContentWrapper').style.display = 'none';
+
+            const userDocRef = doc(db, "users", uid);
+            try {
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    console.log("User Data:", userData);
+
+                    // Update main profile section
+                    document.getElementById('profileDisplayName').textContent = userData.username || 'Pengguna 9Gaul';
+                    document.getElementById('profileUsername').textContent = `@${userData.username.replace(/\s+/g, '_').toLowerCase() || 'pengguna_gaul'}`; // Create a dummy username from display name
+                    document.getElementById('profileBio').textContent = userData.bio || 'Belum ada bio.';
+                    document.getElementById('profileAvatarImage').src = userData.avatarUrl || 'https://via.placeholder.com/120/8ab4f8/FFFFFF?text=P';
+                    document.getElementById('profileCoverImage').src = userData.coverUrl || 'https://via.placeholder.com/800x200/5A6B7D/FFFFFF?text=Cover+Profil';
+
+                    // Update stats (dummy for now, will connect to actual counts)
+                    document.getElementById('fansCount').textContent = (userData.fansCount || 0).toLocaleString();
+                    document.getElementById('hatersCount').textContent = (userData.hatersCount || 0).toLocaleString();
+                    document.getElementById('postsCount').textContent = (userData.postsCount || 0).toLocaleString();
+                    document.getElementById('fansButtonCount').textContent = (userData.fansCount || 0).toLocaleString();
+                    document.getElementById('hatersButtonCount').textContent = (userData.hatersCount || 0).toLocaleString();
+
+                    // Update sidebar profile
+                    document.getElementById('sidebarUsername').textContent = userData.username || 'Pengguna 9Gaul';
+                    document.getElementById('loggedInEmailSidebar').textContent = userData.email || auth.currentUser.email;
+                    document.getElementById('sidebarUserAvatar').src = userData.avatarUrl || 'https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P';
+
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('profileContentWrapper').style.display = 'block';
+                    
+                    // Load content for each tab
+                    await loadUserPosts(uid);
+                    await loadUserMedia(uid);
+                    await loadJoinedGroups(uid);
+
+                    // Show default tab on load
+                    showTab('postsTab');
+
+                } else {
+                    console.warn("User profile not found in Firestore for UID:", uid);
+                    document.getElementById('loadingMessage').textContent = 'Profil pengguna tidak ditemukan.';
+                }
+            } catch (error) {
+                console.error("Error loading user profile:", error);
+                document.getElementById('loadingMessage').textContent = 'Terjadi kesalahan saat memuat profil.';
+            }
+        }
+
+        // --- Fungsi untuk memuat profil pengguna dari Firestore untuk sidebar (dipanggil terpisah jika diperlukan) ---
+        async function loadUserProfileSidebar(uid) {
+            const userDocRef = doc(db, "users", uid);
+            try {
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    document.getElementById('sidebarUsername').textContent = userData.username || 'Pengguna 9Gaul';
+                    document.getElementById('loggedInEmailSidebar').textContent = userData.email || auth.currentUser.email;
+                    document.getElementById('sidebarUserAvatar').src = userData.avatarUrl || 'https://via.placeholder.com/40/8ab4f8/FFFFFF?text=P';
+                } else {
+                    console.warn("User profile not found in Firestore for sidebar:", uid);
+                    document.getElementById('sidebarUsername').textContent = auth.currentUser.email.split('@')[0];
+                    document.getElementById('loggedInEmailSidebar').textContent = auth.currentUser.email;
+                }
+            } catch (error) {
+                console.error("Error loading user profile for sidebar:", error);
+                document.getElementById('sidebarUsername').textContent = auth.currentUser.email.split('@')[0];
+                document.getElementById('loggedInEmailSidebar').textContent = auth.currentUser.email;
+            }
+        }
+
+
+        // --- Fungsi untuk menampilkan tab konten ---
+        function showTab(tabId) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            const tabButtons = document.querySelectorAll('.tab-button');
+
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab-button[data-tab="${tabId.replace('Tab', '')}"]`).classList.add('active');
+
+            // Show "No Content" message if a tab is empty
+            const currentTabContent = document.getElementById(tabId);
+            const noContentMessage = currentTabContent.querySelector('.no-content-message');
+            if (noContentMessage) {
+                 // Check if the tab content has actual dynamic elements (not just the message)
+                const hasDynamicContent = Array.from(currentTabContent.children).some(child => 
+                    !child.classList.contains('no-content-message') && child.tagName !== 'P'
+                );
+                noContentMessage.style.display = hasDynamicContent ? 'none' : 'block';
+            }
+        }
+
+        // --- Fungsi untuk memuat postingan pengguna ---
+        async function loadUserPosts(uid) {
+            const postsTab = document.getElementById('postsTab');
+            postsTab.innerHTML = '<p style="text-align: center; color: var(--sub-text-color);">Memuat postingan...</p>'; // Clear and show loading
+
+            try {
+                const postsCollectionRef = collection(db, 'posts');
+                const q = query(postsCollectionRef, where('userId', '==', uid), orderBy('createdAt', 'desc'), limit(10));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    postsTab.innerHTML = '<p class="no-content-message">Belum ada postingan di sini.</p>';
+                    return;
+                }
+
+                postsTab.innerHTML = ''; // Clear loading message
+
+                // Get user data once for all posts
+                const userDocSnap = await getDoc(doc(db, 'users', uid));
+                const userData = userDocSnap.exists() ? userDocSnap.data() : { username: 'Pengguna Tak Dikenal', avatarUrl: 'https://via.placeholder.com/40/cccccc/000000?text=U' };
+
+                querySnapshot.forEach(docSnapshot => {
+                    const post = docSnapshot.data();
+                    const postId = docSnapshot.id;
+
+                    const postElement = `
+                        <div class="post-card" data-post-id="${postId}">
+                            <div class="post-header">
+                                <img src="${userData.avatarUrl || 'https://via.placeholder.com/40/cccccc/000000?text=U'}" alt="User Avatar" class="post-avatar">
+                                <div class="post-info">
+                                    <span class="post-username">${userData.username || 'Pengguna'}</span>
+                                    <span class="post-time">${formatTimestamp(post.createdAt)}</span>
+                                </div>
+                                <i class="fas fa-ellipsis-h post-options-icon" onclick="alert('Opsi postingan akan datang!')"></i>
+                            </div>
+                            <div class="post-content">
+                                <p>${post.text || ''}</p>
+                            </div>
+                            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="Post Image"></div>` : ''}
+                            <div class="post-actions">
+                                <button onclick="handleVote('${postId}', 'like')"><i class="far fa-heart"></i> ${post.likesCount || 0}</button>
+                                <button onclick="alert('Fitur komentar akan datang!')"><i class="far fa-comment"></i> ${post.commentCount || 0}</button>
+                                <button onclick="alert('Fitur bagikan akan datang!')"><i class="fas fa-share-alt"></i></button>
+                            </div>
+                        </div>
+                    `;
+                    postsTab.innerHTML += postElement;
+                });
+            } catch (error) {
+                console.error("Error loading user posts:", error);
+                postsTab.innerHTML = '<p class="message-error">Gagal memuat postingan.</p>';
+            }
+        }
+
+        // --- Fungsi untuk memuat media pengguna ---
+        async function loadUserMedia(uid) {
+            const mediaGrid = document.querySelector('#mediaTab .media-grid');
+            mediaGrid.innerHTML = '<p style="text-align: center; color: var(--sub-text-color);">Memuat media...</p>'; // Clear and show loading
+
+            try {
+                const postsCollectionRef = collection(db, 'posts');
+                const q = query(postsCollectionRef, where('userId', '==', uid), where('imageUrl', '!=', null), orderBy('imageUrl'), orderBy('createdAt', 'desc'), limit(12)); // Query for posts with images
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    mediaGrid.innerHTML = '<p class="no-content-message">Belum ada media yang diunggah.</p>';
+                    return;
+                }
+
+                mediaGrid.innerHTML = ''; // Clear loading message
+
+                querySnapshot.forEach(docSnapshot => {
+                    const post = docSnapshot.data();
+                    if (post.imageUrl) {
+                        const mediaElement = `<img src="${post.imageUrl}" alt="Media Item" class="media-item" onclick="alert('Lihat media: ${post.imageUrl}')">`;
+                        mediaGrid.innerHTML += mediaElement;
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error loading user media:", error);
+                mediaGrid.innerHTML = '<p class="message-error">Gagal memuat media.</p>';
+            }
+        }
+
+        // --- Fungsi untuk memuat grup yang diikuti pengguna ---
+        async function loadJoinedGroups(uid) {
+            const groupList = document.querySelector('#groupsTab .group-list');
+            groupList.innerHTML = '<p style="text-align: center; color: var(--sub-text-color);">Memuat grup...</p>'; // Clear and show loading
+
+            try {
+                const userDocRef = doc(db, 'users', uid);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (!userDocSnap.exists() || !userDocSnap.data().joinedGroups || userDocSnap.data().joinedGroups.length === 0) {
+                    groupList.innerHTML = '<p class="no-content-message">Belum bergabung dengan grup apapun.</p>';
+                    return;
+                }
+
+                const joinedGroupIds = userDocSnap.data().joinedGroups;
+                groupList.innerHTML = ''; // Clear loading message
+
+                // Fetch details for each joined group
+                for (const groupId of joinedGroupIds) {
+                    const groupDocRef = doc(db, 'groups', groupId);
+                    const groupDocSnap = await getDoc(groupDocRef);
+
+                    if (groupDocSnap.exists()) {
+                        const groupData = groupDocSnap.data();
+                        const groupElement = `
+                            <div class="group-list-item">
+                                <img src="${groupData.iconUrl || 'https://via.placeholder.com/50/CCCCCC/000000?text=G'}" alt="Group Icon">
+                                <div class="group-details">
+                                    <h4>${groupData.name || 'Nama Grup Tidak Dikenal'}</h4>
+                                    <p>${(groupData.membersCount || 0).toLocaleString()} anggota</p>
+                                </div>
+                                <button class="button-secondary-outline" onclick="window.location.href='view-group.html?id=${groupId}'">Lihat Grup</button>
+                            </div>
+                        `;
+                        groupList.innerHTML += groupElement;
+                    }
+                }
+                if (groupList.innerHTML === '') { // Fallback if all fetched groups don't exist anymore
+                     groupList.innerHTML = '<p class="no-content-message">Belum bergabung dengan grup apapun.</p>';
+                }
+
+            } catch (error) {
+                console.error("Error loading joined groups:", error);
+                groupList.innerHTML = '<p class="message-error">Gagal memuat grup.</p>';
+            }
+        }
+
+
+        // Helper function to format timestamp (reused from dashboard/view-group)
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return 'Beberapa waktu lalu';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffSeconds = Math.round(diffMs / 1000);
+            const diffMinutes = Math.round(diffMs / (1000 * 60));
+            const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+            if (diffSeconds < 10) return 'Baru saja';
+            if (diffMinutes < 1) return `${diffSeconds} detik yang lalu`;
+            if (diffMinutes < 60) return `${diffMinutes} menit yang lalu`;
+            if (diffHours < 24) return `${diffHours} jam yang lalu`;
+            if (diffDays < 7) return `${diffDays} hari yang lalu`;
+            return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        // Dummy function for handling post likes (to be connected to Firestore)
+        async function handleVote(postId, type) {
+            alert(`Fungsi vote untuk post ${postId} akan datang! (Tipe: ${type})`);
+            // Contoh implementasi:
+            // const postDocRef = doc(db, 'posts', postId);
+            // await updateDoc(postDocRef, {
+            //     likesCount: increment(1) // from firebase.firestore.FieldValue
+            // });
+        }
+    </script>
+</body>
+</html>

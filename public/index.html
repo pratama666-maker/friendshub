@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Funhub</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <div class="input-group">
+        <label for="loginPassword">Kata Sandi</label>
+        <input type="password" id="loginPassword" required />
+      </div>
+      <button type="submit">Login</button>
+    </form>
+    <p>Belum punya akun? <a href="daftar.html">Daftar di sini</a></p>
+    <div class="message-box" id="messageBox"></div>
+  </div>
+
+  <script type="module">
+    import {
+      auth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged
+    } from './firebase-config.js';
+
+    const loginForm = document.getElementById('loginForm');
+    const messageBox = document.getElementById('messageBox');
+
+    async function hashEmailFromPassword(password) {
+      const msgUint8 = new TextEncoder().encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return `user_${hashHex}@anonlogin.funhub.app`;
+    }
+
+    function showMessage(msg, type = 'info') {
+      messageBox.textContent = msg;
+      messageBox.className = `message-box ${type}`;
+      messageBox.style.display = 'block';
+      setTimeout(() => {
+        messageBox.style.display = 'none';
+      }, 5000);
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = 'dashboard.html';
+      }
+    });
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('loginPassword').value;
+      const email = await hashEmailFromPassword(password);
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showMessage('Login berhasil! Mengarahkan...', 'success');
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showMessage('Login gagal: ' + err.message, 'error');
+      }
+    });
+  </script>
+</body>
+</html>
