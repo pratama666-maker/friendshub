@@ -3,20 +3,22 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, orderBy, limit, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import {createUserWithEmailAndPassword,
+  signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Konfigurasi Firebase dari whatfun-baec7
 const firebaseConfig = {
-  apiKey: "AIzaSyCIDtHVWRQiB-tmOWSK4mnexR_J2SAq790",
-  authDomain: "funhub-3f848.firebaseapp.com",
-  databaseURL: "https://funhub-3f848-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "funhub-3f848",
-  storageBucket: "funhub-3f848.firebasestorage.app",
-  messagingSenderId: "922163960068",
-  appId: "1:922163960068:web:ab2fd526a8ac67fe095851",
-  measurementId: "G-83LMJ1RV1V"
+  apiKey: "AIzaSyBqZEjFY_RBUpME9r4j0-mASlJWIsJTdpE",
+  authDomain: "whatfun-baec7.firebaseapp.com",
+  projectId: "whatfun-baec7",
+  storageBucket: "whatfun-baec7.appspot.com", // perbaiki dari .firebasestorage.app
+  messagingSenderId: "320401713540",
+  appId: "1:320401713540:web:ab7a70aa17e2ae2fc6d5d1",
+  measurementId: "G-L1TSBSW1ME"
 };
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
@@ -30,7 +32,9 @@ export {
   app,
   auth,
   signOut,
-  onAuthStateChanged, // Added for convenience in other modules
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword, // ← ini penting!
   db,
   collection,
   doc,
@@ -44,7 +48,7 @@ export {
   limit,
   arrayUnion,
   arrayRemove,
-  serverTimestamp, // Added for timestamps
+  serverTimestamp,
   storage,
   ref,
   uploadBytes,
