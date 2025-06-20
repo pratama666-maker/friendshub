@@ -9,7 +9,7 @@
 <body>
   <div class="container">
     <h2>Login</h2>
-    <form id="loginForm">
+    <form id="loginForm" autocomplete="off">
       <div class="input-group">
         <label for="loginPassword">Kata Sandi</label>
         <input type="password" id="loginPassword" required />
@@ -30,14 +30,6 @@
     const loginForm = document.getElementById('loginForm');
     const messageBox = document.getElementById('messageBox');
 
-    async function hashEmailFromPassword(password) {
-      const msgUint8 = new TextEncoder().encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      return `user_${hashHex}@anonlogin.funhub.app`;
-    }
-
     function showMessage(msg, type = 'info') {
       messageBox.textContent = msg;
       messageBox.className = `message-box ${type}`;
@@ -45,6 +37,19 @@
       setTimeout(() => {
         messageBox.style.display = 'none';
       }, 5000);
+    }
+
+    async function hashEmailFromPassword(password) {
+      try {
+        const msgUint8 = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return `user_${hashHex}@anonlogin.funhub.app`;
+      } catch (error) {
+        showMessage("Hashing gagal. Coba browser lain.", "error");
+        throw error;
+      }
     }
 
     onAuthStateChanged(auth, (user) => {
@@ -56,14 +61,30 @@
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const password = document.getElementById('loginPassword').value;
+
+      if (password.length < 6) {
+        return showMessage("Minimal 6 karakter.", "error");
+      }
+
       const email = await hashEmailFromPassword(password);
 
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        showMessage('Login berhasil! Mengarahkan...', 'success');
-        window.location.href = 'dashboard.html';
+        showMessage("Login berhasil! Mengarahkan...", "success");
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1000);
       } catch (err) {
-        showMessage('Login gagal: ' + err.message, 'error');
+        console.error("❌ Login gagal:", err.code, err.message);
+        let msg = "Login gagal.";
+        if (err.code === "auth/user-not-found") {
+          msg = "Akun tidak ditemukan. Silakan daftar dulu.";
+        } else if (err.code === "auth/wrong-password") {
+          msg = "Kata sandi salah.";
+        } else if (err.code === "auth/invalid-email") {
+          msg = "Email tidak valid.";
+        }
+        showMessage(msg, "error");
       }
     });
   </script>
