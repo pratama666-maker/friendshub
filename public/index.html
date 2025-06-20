@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GelapKicau - Medsos Anonim</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
+  
+  <!-- ✅ Favicon PNG (ikon tab browser) -->
+  <link rel="icon" type="image/png" href="https://i.ibb.co/ycrTKpts/1750453333696.png">
+
+  <!-- ✅ Thumbnail untuk Sosial Media -->
+  <!-- Open Graph untuk Facebook, Telegram, dll -->
+  <meta property="og:title" content="Gabung ke WhatFun – media social anonymous tampa login">
+  <meta property="og:description" content= "Gabung ke WhatFun – media sosial online tanpa ribet! Buat postingan, ngobrol di grup, dan seru-seruan tanpa perlu login. Cukup buka, ekspresikan dirimu, dan nikmati kebebasan bersosial!">
+  <meta property="og:image" content="https://i.ibb.co/0VtCNtH5/1750453371020.png">
+  <meta property="og:url" content="https://whatfun-baec7.web.app/?">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="whatfun-media social anonymous">
+  <meta name="twitter:description" content="Gabung ke WhatFun – sosial media online tanpa perlu daftar atau login. Buat postingan, obrolan grup, dan ekspresikan dirimu dengan bebas!">
+  <meta name="twitter:image" content="https://i.ibb.co/0VtCNtH5/1750453371020.png">
+
+    <style>
+    /* Global & Tema Gelap */
+:root {
+    --bg-dark: #0a0a0a;
+    --container-bg: #1c1c1c;
+    --card-bg: #222222;
+    --text-light: #f0f0f0;
+    --text-lighter: #ddd;
+    --text-muted: #aaa;
+    --border-color: #333;
+    --input-bg: #2a2a2a;
+
+    /* Palet Warna Aksen Baru */
+    --accent-blue: #007bff;
+    --accent-blue-hover: #0056b3;
+    --accent-green: #28a745;
+    --accent-green-hover: #218838;
+    --accent-red: #dc3545;
+    --accent-red-hover: #c82333;
+    --accent-purple: #8A2BE2;
+    --accent-purple-hover: #6A1AA0;
+    --accent-orange: #FF8C00;
+    --accent-orange-hover: #CC7000;
+    --accent-teal: #00CED1;
+    --accent-teal-hover: #00999C;
+    --accent-yellow: #FFD700;
+    --accent-yellow-hover: #CCAA00;
+    --accent-pink: #FF69B4; /* Warna baru untuk variasi */
+    --accent-cyan: #00FFFF; /* Warna baru untuk variasi */
+
+    --button-primary: var(--accent-blue);
+    --button-primary-hover: var(--accent-blue-hover);
+    --button-secondary: #555;
+    --button-secondary-hover: #777;
+
+    /* Warna Navigasi Bawah */
+    --bottom-nav-bg: #1c1c1c;
+    --bottom-nav-item-color: var(--text-muted);
+    --bottom-nav-item-active: var(--accent-blue);
+
+    /* Tinggi Header sebagai custom property */
+    --header-height-mobile: 60px; /* Diperbaiki */
+    --header-height-desktop: 70px;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden; /* Mencegah scroll horizontal yang tidak diinginkan di body */
+}
+
+/* --- Header (Universal) --- */
+.header {
+    width: 100%;
+    background-color: var(--container-bg);
+    padding: 10px 20px; /* Padding sedikit disesuaikan */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    z-index: 100;
+    position: sticky;
+    top: 0;
+    box-sizing: border-box;
+    min-height: var(--header-height-mobile); /* Pastikan tinggi minimum */
+}
+.header h1 {
+    margin: 0;
+    color: var(--text-lighter);
+    font-size: 1.6em; /* Sedikit dikecilkan untuk mobile */
+    cursor: pointer;
+    font-weight: 700;
+    flex-shrink: 0; /* Penting: cegah judul mengecil */
+    text-align: left;
+    white-space: nowrap; /* Cegah judul pecah baris */
+}
+.profile-search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Kurangi gap */
+    width: 100%; /* Lebar penuh di mobile */
+    margin-top: 10px;
+    flex-wrap: nowrap; /* Penting: cegah wrapping di dalam container ini */
+    overflow: hidden; /* Sembunyikan overflow internal jika elemen terlalu besar */
+}
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Kurangi gap */
+    flex-shrink: 0; /* Penting: mencegah profile info mengecil */
+}
+.profile-info .avatar {
+    width: 36px; /* Sedikit dikecilkan */
+    height: 36px; /* Sedikit dikecilkan */
+    font-size: 1.1em; /* Sesuaikan ukuran font */
+}
+.profile-info .username, .profile-info .auth-status {
+    display: none; /* Tetap sembunyikan di mobile */
+}
+
+/* Search Bar di Header */
+.header .search-bar {
+    flex-grow: 1;
+    margin-left: 10px; /* Kurangi margin */
+    position: relative;
+    min-width: 120px; /* Pastikan search bar tidak terlalu kecil */
+    max-width: 100%; /* Penting: batasi lebar search bar */
+    flex-shrink: 1; /* Izinkan search bar mengecil jika ruang terbatas */
+}
+.header .search-bar input {
+    width: 100%;
+    padding: 8px; /* Sedikit dikecilkan */
+    border: 1px solid var(--border-color);
+    border-radius: 18px; /* Sesuaikan radius */
+    background-color: var(--input-bg);
+    color: var(--text-light);
+    font-size: 0.95em; /* Sedikit dikecilkan */
+    padding-left: 35px; /* Sesuaikan padding untuk icon */
+    box-sizing: border-box;
+}
+.header .search-bar input::placeholder {
+    color: var(--text-muted);
+}
+.header .search-bar .search-icon {
+    position: absolute;
+    left: 12px; /* Sesuaikan posisi icon */
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+/* --- Main Content Layout --- */
+.main-layout {
+    display: flex;
+    flex-grow: 1;
+    width: 100%;
+    overflow-x: hidden; /* Penting: mencegah scroll horizontal di layout utama */
+    flex-direction: column; /* Default stack vertikal untuk semua screen */
+}
+.sidebar {
+    display: none; /* Sembunyi secara default, ditampilkan di layar lebih besar */
+    width: 250px;
+    background-color: var(--container-bg);
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
+    position: sticky; /* Sidebar akan tetap di posisinya saat discroll */
+    top: var(--header-height-desktop); /* Posisikan di bawah header di desktop */
+    height: calc(100vh - var(--header-height-desktop)); /* Tinggi penuh dikurangi tinggi header */
+    box-sizing: border-box;
+    overflow-y: auto; /* Memungkinkan konten sidebar untuk discroll */
+}
+.sidebar .nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.sidebar .nav-links button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.1em;
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.sidebar .nav-links button:hover, .sidebar .nav-links button.active {
+    color: var(--text-light);
+    background-color: var(--border-color);
+}
+/* Gaya untuk SVG di tombol navigasi */
+.sidebar .nav-links button svg {
+    fill: currentColor; /* Mengambil warna dari teks tombol */
+    width: 20px;
+    height: 20px;
+}
+.page-content {
+    flex-grow: 1;
+    padding: 15px; /* Kurangi padding default */
+    box-sizing: border-box;
+    max-width: 100%; /* Penting: batasi lebar maksimal agar tidak melebihi viewport */
+    margin: 0 auto; /* Tengahkankan konten */
+    padding-bottom: 70px; /* Spasi untuk navigasi bawah di mobile */
+    overflow-x: hidden; /* Pastikan tidak ada overflow horizontal di page-content */
+}
+.container {
+    background-color: var(--container-bg);
+    padding: 20px; /* Sedikit kurangi padding container */
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    margin-bottom: 15px; /* Kurangi margin bawah */
+    box-sizing: border-box; /* Penting untuk width: 100% */
+    overflow: hidden; /* Sembunyikan overflow internal container */
+}
+h2 {
+    color: var(--text-lighter);
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+h3 {
+    color: var(--text-lighter);
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+/* --- Bottom Navigation (Mobile Only) --- */
+.bottom-nav {
+    display: none; /* Sembunyi secara default, ditampilkan secara eksplisit di media query */
+    justify-content: space-around;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: var(--bottom-nav-bg);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    /* --- UI Improvement: Melengkung Sudut Navigasi HP --- */
+    border-top-left-radius: 20px; /* Radius lebih besar */
+    border-top-right-radius: 20px; /* Radius lebih besar */
+    /* Tambahkan gradient halus untuk kedalaman */
+    background: linear-gradient(to top, var(--bottom-nav-bg), #252525);
+    padding-bottom: env(safe-area-inset-bottom, 0); /* Untuk notch phone */
+    box-sizing: border-box;
+}
+.bottom-nav button {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--bottom-nav-item-color);
+    font-size: 0.9em;
+    padding: 5px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease; /* Tambahkan transform untuk efek klik halus */
+    font-weight: 600;
+}
+.bottom-nav button:hover, .bottom-nav button.active {
+    color: var(--bottom-nav-item-active);
+    transform: translateY(-2px); /* Sedikit mengangkat saat hover/aktif */
+}
+.bottom-nav button i {
+    font-size: 1.4em;
+}
+
+/* Forms General Styles */
+.form-group {
+    margin-bottom: 15px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-lighter);
+    font-weight: 600;
+}
+.form-group input[type="text"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--input-bg);
+    color: var(--text-light);
+    font-family: 'Poppins', sans-serif;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* New Post Form Styling (Facebook-like) */
+.post-form {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    margin-bottom: 20px;
+}
+.post-form .textarea-wrapper {
+    position: relative;
+    margin-bottom: 10px; /* Kurangi margin */
+}
+.post-form textarea {
+    width: 100%;
+    padding: 12px; /* Sedikit kurangi padding */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--input-bg);
+    color: var(--text-light);
+    font-family: 'Poppins', sans-serif;
+    font-size: 1em; /* Sesuaikan ukuran font */
+    min-height: 80px; /* Sedikit kurangi tinggi minimum */
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.post-form textarea:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+.post-form textarea::placeholder {
+    color: var(--text-muted);
+}
+.post-form .file-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 3px; /* Sedikit kurangi padding */
+    margin-bottom: 10px; /* Kurangi margin */
+    flex-wrap: wrap; /* Izinkan wrapping jika nama file terlalu panjang */
+}
+.post-form .file-input-wrapper label {
+    background-color: var(--button-secondary);
+    color: var(--text-light);
+    padding: 6px 10px; /* Sesuaikan padding tombol file */
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+    font-size: 0.9em; /* Kecilkan font */
+}
+.post-form .file-input-wrapper label:hover {
+    background-color: var(--button-secondary-hover);
+}
+.post-form .file-input-wrapper input[type="file"] {
+    display: none;
+}
+.post-form .file-input-wrapper .file-name {
+    color: var(--text-lighter);
+    flex-grow: 1;
+    padding-left: 5px;
+    overflow: hidden;
+    white-space: normal; /* Izinkan teks file name pecah baris */
+    word-break: break-word; /* Pastikan kata panjang juga pecah baris */
+    font-size: 0.85em; /* Kecilkan font */
+}
+.post-form button {
+    width: 100%;
+    padding: 10px 15px; /* Sedikit kurangi padding tombol */
+    background-color: var(--button-primary);
+    color: white;
+    border: none;
+    border-radius: 5px; /* Sesuaikan radius */
+    cursor: pointer;
+    font-size: 1em; /* Kecilkan font */
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+.post-form button:hover {
+    background-color: var(--button-primary-hover);
+}
+
+.create-group-form .banner-preview {
+    width: 100%;
+    height: 150px;
+    background-color: #3a3a3a;
+    border: 1px dashed var(--border-color);
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+.create-group-form .banner-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.create-group-form .banner-preview span {
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+/* Post Feed Grid */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+}
+.post-item {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    /* --- UI Improvement: Warna pada Feed --- */
+    border-left: 5px solid transparent; /* Tambahkan border berwarna */
+    animation: pulseBorder 5s infinite ease-in-out; /* Animasi halus */
+    max-width: 100%; /* Pastikan item tidak melebihi lebar layar */
+    box-sizing: border-box;
+}
+/* Berikan warna border berbeda berdasarkan urutan */
+.post-item:nth-child(1n) { border-left-color: var(--accent-blue); }
+.post-item:nth-child(2n) { border-left-color: var(--accent-green); }
+.post-item:nth-child(3n) { border-left-color: var(--accent-purple); }
+.post-item:nth-child(4n) { border-left-color: var(--accent-orange); }
+.post-item:nth-child(5n) { border-left-color: var(--accent-teal); }
+.post-item:nth-child(6n) { border-left-color: var(--accent-pink); }
+.post-item:nth-child(7n) { border-left-color: var(--accent-cyan); }
+
+@keyframes pulseBorder {
+    0% { border-left-color: var(--accent-blue); }
+    14% { border-left-color: var(--accent-green); }
+    28% { border-left-color: var(--accent-purple); }
+    42% { border-left-color: var(--accent-orange); }
+    56% { border-left-color: var(--accent-teal); }
+    70% { border-left-color: var(--accent-pink); }
+    84% { border-left-color: var(--accent-cyan); }
+    100% { border-left-color: var(--accent-blue); }
+}
+
+.post-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.retweet-indicator {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    font-size: 0.8em;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    z-index: 1;
+    background-color: var(--border-color);
+    padding: 3px 8px;
+    border-radius: 5px;
+}
+.retweet-indicator i {
+    color: var(--accent-blue);
+}
+.post-item p {
+    margin: 0 0 10px 0;
+    line-height: 1.5;
+    color: var(--text-lighter);
+    word-break: break-word;
+    padding-top: 20px;
+}
+.post-item img, .post-item video {
+    display: block;
+    width: 100%;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    object-fit: contain;
+    max-height: 400px;
+}
+.post-item .meta {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    text-align: right;
+    margin-top: auto;
+}
+.hashtag {
+    color: var(--accent-teal);
+    font-weight: bold;
+    text-decoration: none;
+}
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    border-top: 1px solid #444;
+    padding-top: 10px;
+}
+.vote-buttons button, .action-icon {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.2em;
+    padding: 5px 10px;
+    transition: color 0.2s ease;
+}
+.vote-buttons button:hover, .action-icon:hover {
+    color: var(--text-light);
+}
+.vote-buttons span {
+    color: var(--text-light);
+    font-weight: bold;
+    margin: 0 5px;
+}
+.vote-buttons .upvoted { color: var(--accent-green); }
+.vote-buttons .downvoted { color: var(--accent-red); }
+
+.original-post-quote {
+    background-color: var(--border-color);
+    border-left: 3px solid var(--accent-blue);
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+.original-post-quote p {
+    color: var(--text-lighter);
+    margin-bottom: 5px;
+}
+.original-post-quote .meta {
+    font-size: 0.8em;
+    color: var(--text-muted);
+}
+.original-post-quote img, .original-post-quote video {
+    max-height: 150px;
+    margin-bottom: 5px;
+}
+
+/* Group Page Styles */
+.group-controls {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.group-controls button {
+    background-color: var(--button-primary);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+.group-controls button:hover {
+    background-color: var(--button-primary-hover);
+}
+.groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+}
+.group-item {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    max-width: 100%; /* Pastikan item tidak melebihi lebar layar */
+    box-sizing: border-box;
+}
+.group-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+.group-item .group-banner-thumb {
+    width: 100%;
+    height: 120px;
+    background-color: var(--border-color);
+    background-size: cover;
+    background-position: center;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ccc;
+    font-size: 0.9em;
+}
+.group-item .group-content {
+    padding: 15px;
+}
+.group-item h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    color: var(--text-lighter);
+    font-size: 1.2em;
+}
+.group-item p {
+    font-size: 0.9em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    max-height: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.group-item .group-meta {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+/* Group Detail Page Styles */
+.group-detail-header {
+    text-align: center;
+    margin-bottom: 20px;
+    background-color: var(--container-bg);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+.group-detail-banner {
+    width: 100%;
+    height: 200px;
+    background-color: var(--border-color);
+    background-size: cover;
+    background-position: center;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ccc;
+    font-size: 1.2em;
+}
+.group-detail-header h2 {
+    margin-top: 0;
+    color: var(--text-light);
+}
+.group-detail-header p {
+    color: var(--text-lighter);
+    margin-bottom: 15px;
+}
+.group-detail-meta {
+    font-size: 0.9em;
+    color: var(--text-muted);
+    margin-bottom: 15px;
+}
+.group-detail-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+.group-detail-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+.group-detail-actions .btn-back {
+    background-color: var(--button-secondary);
+    color: white;
+}
+.group-detail-actions .btn-back:hover {
+    background-color: var(--button-secondary-hover);
+}
+.group-detail-actions .btn-vote-disband {
+    background-color: var(--accent-red);
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.group-detail-actions .btn-vote-disband:hover {
+    background-color: var(--accent-red-hover);
+}
+.group-detail-actions .btn-join-group {
+    background-color: var(--accent-green);
+    color: white;
+}
+.group-detail-actions .btn-join-group:hover {
+    background-color: var(--accent-green-hover);
+}
+
+.group-disband-votes {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background-color: var(--border-color);
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    color: var(--text-light);
+    margin-top: 10px;
+}
+.group-disband-votes .vote-count-up {
+    color: var(--accent-green);
+    font-weight: bold;
+}
+.group-disband-votes .vote-count-down {
+    color: var(--accent-red);
+    font-weight: bold;
+}
+.group-disband-votes .time-remaining {
+    color: var(--accent-yellow);
+}
+
+/* Post Detail Page Styles */
+.post-detail-page .post-item {
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    animation: none; /* Nonaktifkan animasi border di halaman detail */
+    border-left: 5px solid var(--accent-blue); /* Border konsisten */
+}
+.post-detail-page .post-item .actions {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+.post-detail-page .back-button {
+    background-color: var(--button-secondary);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    margin-bottom: 20px;
+    display: block;
+    width: fit-content;
+}
+.post-detail-page .back-button:hover {
+    background-color: var(--button-secondary-hover);
+}
+.retweets-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+.retweets-list .post-item {
+    background-color: var(--input-bg);
+    margin-bottom: 10px;
+    border-left: 3px solid var(--accent-teal); /* Border berbeda untuk retweet */
+}
+.retweets-list .post-item p {
+    padding-top: 0;
+}
+
+/* Modal (Pop-up) */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+.modal-content {
+    background-color: var(--container-bg);
+    margin: auto;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    width: 90%;
+    max-width: 500px;
+    color: var(--text-light);
+    position: relative;
+}
+.close-button {
+    color: var(--text-muted);
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.close-button:hover, .close-button:focus {
+    color: var(--text-light);
+    text-decoration: none;
+}
+.modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    resize: vertical;
+    min-height: 60px;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--input-bg);
+    color: var(--text-light);
+    box-sizing: border-box;
+}
+.modal-content button {
+    width: 100%;
+    padding: 10px 15px;
+    background-color: var(--button-primary);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+.modal-content button:hover {
+    background-color: var(--button-primary-hover);
+}
+
+/* Modal Share */
+#shareModal .share-options button {
+    background-color: var(--button-secondary);
+    margin-top: 10px;
+}
+#shareModal .share-options button:hover {
+    background-color: var(--button-secondary-hover);
+}
+#shareModal input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--input-bg);
+    color: var(--text-light);
+    box-sizing: border-box;
+}
+#shareModal .copy-info {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+/* --- Responsive Design --- */
+/* Untuk Mobile (max-width: 767px) */
+@media (max-width: 767px) {
+    body {
+        overflow-y: auto; /* Izinkan body discroll di mobile */
+        display: block; /* Hapus flexbox untuk body */
+    }
+    .header {
+        position: fixed; /* Header tetap di atas */
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--header-height-mobile);
+        min-height: unset; /* Reset min-height */
+        padding: 10px 15px; /* Sesuaikan padding */
+        flex-direction: row; /* Atur header menjadi baris */
+        justify-content: space-between; /* Spasi antar elemen */
+        align-items: center;
+        flex-wrap: nowrap; /* Penting: cegah wrapping di header mobile */
+    }
+    .header h1 {
+        font-size: 1.4em; /* Lebih kecil lagi */
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+    .profile-search-container {
+        flex-grow: 1; /* Izinkan container search/profile mengambil ruang */
+        width: auto;
+        margin-top: 0;
+        justify-content: flex-end; /* Pindahkan ke kanan */
+        flex-wrap: nowrap;
+        overflow: hidden;
+    }
+    .header .search-bar {
+        margin-left: 0; /* Hapus margin kiri */
+        flex-basis: 60%; /* Beri basis fleksibel untuk search bar */
+        max-width: 250px; /* Batasi lebar maksimal search bar di mobile */
+    }
+    .profile-info {
+        order: 2; /* Pindahkan ke kanan dari search bar */
+        margin-left: 10px; /* Beri sedikit spasi */
+    }
+
+    .main-layout {
+        height: auto; /* Izinkan tinggi otomatis */
+        padding-top: var(--header-height-mobile); /* Dorong konten ke bawah header */
+        overflow-y: auto; /* Izinkan main-layout untuk discroll */
+        -webkit-overflow-scrolling: touch; /* Untuk scrolling halus iOS */
+    }
+    .page-content {
+        padding: 15px 10px; /* Sesuaikan padding */
+        max-width: 100%; /* Pastikan selalu 100% */
+        overflow-x: hidden; /* Pastikan tidak ada overflow horizontal */
+    }
+    .bottom-nav {
+        display: flex; /* Tampilkan navigasi bawah di mobile */
+    }
+    .posts-grid, .groups-grid {
+        grid-template-columns: 1fr; /* Satu kolom di mobile */
+        gap: 10px;
+    }
+}
+
+/* Untuk PC/iPad (min-width: 768px) */
+@media (min-width: 768px) {
+    .header {
+        height: var(--header-height-desktop); /* Tinggi tetap untuk desktop */
+        padding: 15px 40px;
+        position: sticky;
+        top: 0;
+        justify-content: flex-start; /* Elemen di header sejajar ke kiri */
+        gap: 20px;
+        flex-wrap: nowrap;
+    }
+    .header h1 {
+        font-size: 1.8em;
+        margin-right: 20px;
+    }
+    .profile-search-container {
+        flex-grow: 1;
+        justify-content: flex-end; /* Profile dan search bar ke kanan */
+        order: unset; /* Reset order */
+    }
+    .profile-info .username,
+    .profile-info .auth-status {
+        display: block; /* Tampilkan di desktop */
+    }
+    .profile-info {
+        gap: 10px; /* Atur ulang gap */
+    }
+    .profile-info .avatar {
+        width: 40px;
+        height: 40px;
+    }
+    .header .search-bar {
+        max-width: 400px; /* Batasi lebar maksimal search bar di desktop */
+        margin-left: 0;
+        flex-basis: auto; /* Reset flex-basis */
+    }
+
+    .main-layout {
+        flex-direction: row; /* Sidebar dan konten bersebelahan */
+        height: calc(100vh - var(--header-height-desktop)); /* Tinggi penuh dikurangi header */
+        overflow-y: hidden; /* Konten di dalam sidebar/page-content yang akan discroll */
+        padding-top: 0; /* Hapus padding top */
+    }
+    .sidebar {
+        display: flex; /* Tampilkan sidebar di desktop */
+        height: 100%; /* Sidebar mengambil tinggi penuh dari main-layout */
+        position: sticky;
+        top: 0;
+        overflow-y: auto; /* Memungkinkan konten sidebar untuk discroll */
+    }
+    .page-content {
+        padding: 20px 40px; /* Padding lebih besar di desktop */
+        padding-bottom: 20px;
+        overflow-y: auto; /* Izinkan konten halaman untuk discroll */
+        height: 100%; /* Konten halaman mengambil tinggi penuh dari main-layout */
+    }
+    .bottom-nav {
+        display: none; /* Sembunyikan navigasi bawah di desktop */
+    }
+    .posts-grid, .groups-grid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* 2 atau lebih kolom di desktop */
+        gap: 20px;
+    }
+    .container {
+        padding: 30px; /* Kembali ke padding lebih besar */
+        margin-bottom: 20px;
+    }
+    .post-form textarea {
+        min-height: 100px; /* Kembali ke tinggi default */
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 onclick="showPage('home')">GelapKicau</h1>
+        <div class="profile-search-container">
+            <div class="profile-info">
+                <div class="avatar" id="userAvatar">?</div>
+                <div>
+                    <div class="username" id="userName">Memuat...</div>
+                    <div class="auth-status" id="authStatus"></div>
+                </div>
+            </div>
+            <div class="search-bar">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchPostInput" placeholder="Cari kicauan atau #hashtag...">
+            </div>
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <div class="sidebar">
+            <div class="nav-links">
+                <button id="homePageBtn" class="active"><i class="fas fa-home"></i> Beranda</button>
+                <button id="groupPageBtn"><i class="fas fa-users"></i> Grup</button>
+            </div>
+        </div>
+
+        <div class="page-content">
+            <div id="homePage">
+                <div class="container post-form-container">
+                    <h2>Buat Kicauan Baru</h2>
+                    <div class="post-form">
+                        <div class="textarea-wrapper">
+                            <textarea id="postContent" placeholder="Apa yang ingin Anda bagikan? (dukungan #hashtag)"></textarea>
+                        </div>
+                        <div class="file-input-wrapper">
+                            <label for="mediaFile">
+                                <i class="fas fa-camera"></i> Tambah Media
+                            </label>
+                            <input type="file" id="mediaFile" accept="image/*, video/*">
+                            <span class="file-name" id="selectedFileName">Tidak ada file dipilih</span>
+                        </div>
+                        <button id="submitPostBtn">Kicaukan!</button>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <h2>Feed Anonim</h2>
+                    <div id="postsGrid" class="posts-grid">
+                        <p style="text-align: center; color: var(--text-muted);">Memuat kicauan...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="groupPage" style="display:none;">
+                <div class="container">
+                    <div class="group-controls">
+                        <h2>Grup Kicauan</h2>
+                        <button id="createGroupBtn"><i class="fas fa-plus-circle"></i> Buat Grup Baru</button>
+                    </div>
+                    <div id="groupsGrid" class="groups-grid">
+                        <p style="text-align: center; color: var(--text-muted);">Memuat daftar grup...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="createGroupPage" style="display:none;">
+                <div class="container">
+                    <h2>Buat Grup Baru</h2>
+                    <div class="create-group-form">
+                        <div class="form-group">
+                            <label for="groupNameInput">Nama Grup:</label>
+                            <input type="text" id="groupNameInput" placeholder="Nama unik untuk grup Anda" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="groupDescriptionInput">Deskripsi Grup:</label>
+                            <textarea id="groupDescriptionInput" placeholder="Jelaskan tentang grup Anda"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="groupCategorySelect">Kategori:</label>
+                            <select id="groupCategorySelect">
+                                <option value="Umum">Umum</option>
+                                <option value="Teknologi">Teknologi</option>
+                                <option value="Seni">Seni</option>
+                                <option value="Olahraga">Olahraga</option>
+                                <option value="Hobi">Hobi</option>
+                                <option value="Gaya Hidup">Gaya Hidup</option>
+                                <option value="Berita">Berita</option>
+                                <option value="Edukasi">Edukasi</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="groupBannerFileInput">Banner Grup (Max 5MB):</label>
+                            <div class="file-input-wrapper">
+                                <label for="groupBannerFileInput">
+                                    <i class="fas fa-image"></i> Pilih Gambar
+                                </label>
+                                <input type="file" id="groupBannerFileInput" accept="image/*">
+                                <span class="file-name" id="selectedBannerFileName">Tidak ada file dipilih</span>
+                            </div>
+                            <div class="banner-preview" id="groupBannerPreview">
+                                <span>Pratinjau Banner</span>
+                            </div>
+                        </div>
+                        <button id="submitCreateGroupBtn">Buat Grup</button>
+                        <button id="cancelCreateGroupBtn" style="background-color: var(--button-secondary); margin-top: 10px;">Batal</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="groupDetailPage" style="display:none;">
+                <div class="container group-detail-header">
+                    <div class="group-detail-banner" id="groupDetailBanner">
+                        <span>Memuat Banner...</span>
+                    </div>
+                    <h2 id="groupDetailName">Memuat Nama Grup...</h2>
+                    <p id="groupDetailDescription">Memuat Deskripsi...</p>
+                    <div class="group-detail-meta">
+                        Kategori: <span id="groupDetailCategory">Memuat...</span> |
+                        Dibuat oleh: <span id="groupDetailAuthor">Memuat...</span> |
+                        Anggota: <span id="groupDetailMembers">Memuat...</span>
+                    </div>
+                    <div class="group-disband-votes">
+                        <i class="fas fa-gavel"></i> Vote Bubar:
+                        <span class="vote-count-up" id="disbandUpVotesCount">0</span> Up /
+                        <span class="vote-count-down" id="disbandDownVotesCount">0</span> Down
+                        <span class="time-remaining" id="disbandVoteTimeRemaining"></span>
+                    </div>
+                    <div class="group-detail-actions">
+                        <button id="backToGroupsBtn" class="btn-back"><i class="fas fa-arrow-left"></i> Kembali ke Grup</button>
+                        <button id="joinGroupBtn" class="btn-join-group"><i class="fas fa-user-plus"></i> Gabung Grup</button>
+                        <button id="leaveGroupBtn" class="btn-join-group" style="display:none;"><i class="fas fa-user-minus"></i> Keluar Grup</button>
+                        <button id="voteDisbandUpBtn" class="btn-vote-disband" title="Vote untuk membubarkan grup ini"><i class="fas fa-thumbs-up"></i> Bubar</button>
+                        <button id="voteDisbandDownBtn" class="btn-vote-disband" title="Vote untuk mempertahankan grup ini"><i class="fas fa-thumbs-down"></i> Pertahankan</button>
+                    </div>
+                </div>
+                <div class="container post-form-container" id="groupPostFormContainer" style="display:none;">
+                    <h2>Buat Kicauan di Grup <span id="currentGroupNameForPost"></span></h2>
+                    <div class="post-form">
+                        <div class="textarea-wrapper">
+                            <textarea id="groupPostContent" placeholder="Apa yang ingin Anda bagikan di grup ini? (dukungan #hashtag)"></textarea>
+                        </div>
+                        <div class="file-input-wrapper">
+                            <label for="groupMediaFile">
+                                <i class="fas fa-camera"></i> Tambah Media
+                            </label>
+                            <input type="file" id="groupMediaFile" accept="image/*, video/*">
+                            <span class="file-name" id="selectedGroupFileName">Tidak ada file dipilih</span>
+                        </div>
+                        <button id="submitGroupPostBtn">Kicaukan di Grup!</button>
+                    </div>
+                </div>
+                <div class="container">
+                    <h3>Kicauan di Grup Ini</h3>
+                    <div id="groupPostsGrid" class="posts-grid">
+                        <p style="text-align: center; color: var(--text-muted);">Tidak ada kicauan di grup ini.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="postDetailPage" style="display:none;">
+                <button id="backToFeedBtn" class="back-button"><i class="fas fa-arrow-left"></i> Kembali ke Feed</button>
+                <div class="container post-detail-page">
+                    <div id="singlePostContainer">
+                        <p style="text-align: center; color: var(--text-muted);">Memuat kicauan...</p>
+                    </div>
+                    <div class="retweets-section">
+                        <h3>Retweet dan Quote dari Kicauan Ini</h3>
+                        <div id="retweetsList" class="retweets-list">
+                            <p style="text-align: center; color: var(--text-muted);">Tidak ada retweet untuk kicauan ini.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="retweetModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeRetweetModal">&times;</span>
+            <h2>Kicauan Quote</h2>
+            <textarea id="retweetQuoteContent" placeholder="Tambahkan komentar Anda untuk retweet ini (opsional)"></textarea>
+            <div id="quotedPostPreview" class="original-post-quote">
+                </div>
+            <button id="submitQuoteRetweetBtn">Kicaukan Retweet</button>
+        </div>
+    </div>
+
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeShareModal">&times;</span>
+            <h2>Bagikan Kicauan</h2>
+            <div class="share-options">
+                <input type="text" id="shareLinkInput" readonly>
+                <p class="copy-info">Salin tautan di atas untuk dibagikan.</p>
+                <button id="copyShareLinkBtn">Salin Tautan</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <button id="bottomHomeBtn" class="active"><i class="fas fa-home"></i> Beranda</button>
+        <button id="bottomGroupBtn"><i class="fas fa-users"></i> Grup</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+    <script src="script.js"></script>
+</body>
+</html>
